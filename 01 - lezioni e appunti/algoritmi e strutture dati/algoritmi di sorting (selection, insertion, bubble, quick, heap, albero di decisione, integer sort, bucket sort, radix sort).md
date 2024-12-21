@@ -153,7 +153,7 @@ procedura partition(Array A, indici i e f) -> indice
 	sup = f+1
 	while(true) do
 		do inf++ while(inf <= f e A[inf] <= x)
-		do sup++ while(A[sup] > x)
+		do sup-- while(A[sup] > x)
 		if(inf < sup) then scambia A[inf] e A[sup]
 		else break
 	scambia A[i] e A[sup]

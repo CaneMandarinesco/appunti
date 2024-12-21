@@ -5,6 +5,8 @@ Bisogna gestire tipi diversi di memorie:
 > astrarre la memoria : i processi pensano che la memoria sia fatta in un modo, fisicamente e' organizzata in maniera diversa. I processi hanno l'illusione di avere la memoria dedicata solo per loro.
 
 ### Modello Senza astrazione: Monoprogrammazione
+
+tre modi per caricare il sistema operativo:
 * sistema operativo caricato in ram
 * sistema operativo caricato in rom
 * **misto** es: MS-DOS.

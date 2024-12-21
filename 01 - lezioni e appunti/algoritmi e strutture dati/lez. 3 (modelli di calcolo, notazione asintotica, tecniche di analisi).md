@@ -85,7 +85,7 @@ ovvero in italiano:
 > - $2n^2 + 4 \in O(n^3)$
 
 > vale che:
-> * $f(n) = o(g(n)) \to \lim_{ n \to \infty } \frac{f(n)}{g(n)}$
+> * $f(n) = o(g(n)) \to \lim_{ n \to \infty } \frac{f(n)}{g(n)} = 0$
 > * $f(n) = \omega(g(n)) \to \lim_{ n \to \infty } \frac{f(n)}{g(n)} = \infty$
 
 ### Esempi
