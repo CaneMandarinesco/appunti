@@ -76,21 +76,8 @@ La soluzione si trova in $OPT[n-1,s]$ (dato che un cammino semplice ha al più $
 Ora, invece di scrivere il solito algoritmo che applica la formula di $\text{bellman-ford}$ implementiamo l'algoritmo usando due array di dimensione $n$ e non teniamo conto in memoria del numero di archi usati nel path:
 * $d[v]$: distanza stimata da $v$ a $t$ (inizialmente infinito)
 * $succ[v]$: nodo successore a $v$ nello shortest path verso $t$.
-
->[!note] $d[v] < w(v \to t)$  con $v \to t$ path che usa al massimo $i$ archi
->Per induzione:
-> * $i=0$: allora $d[t]=0$.
-> * due casi: se uso un'arco $(v,u)$ per stimare $v$ allora $d[v] = l_{vu}+ d[u]$, dato che $d[u] \leq w(P)$ (per induzione e' meglio dell'ottimo), il numero di archi aumenta di 1. Altrimenti il numero di archi e' invariato.
-
-> [!note] Ogni ciclo diretto in $succ[v]$ e' un ciclo negativo
-> Quando si forma un ciclo: $v_{1}, v_{2}, ..., v_{k}$ in $succ[v_{1}]$ si ha che 
-> * $d[v_{1}] \geq d[v_{2}] + l_{v_{1} v_{2}}$
-> * $d[v_{2}] \geq d[v_{3}] ...$
-> * $d[v_{k}] > d[v_{1]}+ l_{v_{k}v_1}$ (per forza strettamente, un nodo ha la stima aggiornata).
-> 
-> allora algebricamente deve essere che: $l_{v_{1} v_{2}} + ... + l_{v_{k}v_{1}} < 0$.
-
-
+# Dimostrazioni di correttezza
+[]
 
 
 
