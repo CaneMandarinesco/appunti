@@ -77,7 +77,11 @@ Ora, invece di scrivere il solito algoritmo che applica la formula di $\text{bel
 * $d[v]$: distanza stimata da $v$ a $t$ (inizialmente infinito)
 * $succ[v]$: nodo successore a $v$ nello shortest path verso $t$.
 # Dimostrazioni di correttezza
-[]
+> $d[v]$ e' shortest path che usa al piu $i$ archi.
+
+> se $succ[v]$ 
+
+
 
 
 

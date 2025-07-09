@@ -39,3 +39,4 @@ Data un'istanza di Vertex Cover posso costruire $U = {e \in E}$, e definire i so
 a set cover of size k.t: una formula `CNF` ossia fatta cosi: $(x_1 \lor x_2 \lor x_3) \land (...) \land (x_1 \lor x_2 \lor x_3)$ composta solo dai literali $x_1, x_2, x_3$ che possono anche comparire negati.
 > **Output**: verificare se la formula e' **soddisfacibile**.
 
+Per ridurre `3SAT` a Vertex Cover 
