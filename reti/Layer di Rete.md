@@ -39,7 +39,7 @@ Bisogna scegliere una Scheduling Policy, per esempio round robin a classi, pero'
 Nota: anche se introduciamo le classi, la rete dovrebbe restare neutrale, e' uno dei capi saldi delle reti.
 
 Un datagramma IP e' costituito dai seguenti campi:
-* QoS: 2 byte descrivono la priorita del pacchetto e il tipo
+* ToS: 2 byte descrivono la priorita del pacchetto e il tipo
 * Lunghezza dell'intero datagramma
 * Checksum solo dell'intestazione
 * Bit DF, Offset, e ID: servono per la frammentazione del pacchetto
