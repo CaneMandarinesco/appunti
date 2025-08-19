@@ -2,18 +2,25 @@
 * fondamenti: 5 settembre
 * lmp: 15 settembre
 * (algebra lineare)
+* eventualmente c'e' il secondo appello di fondamenti perche' mi pare troppa roba
 
 
-|                 | Lunedi                        | Martedi | Mercoledi                                         | Giovedi | Venerdi                     | Sabato               | Domenica                                            |
-| --------------- | ----------------------------- | ------- | ------------------------------------------------- | ------- | --------------------------- | -------------------- | --------------------------------------------------- |
-| **fine luglio** | **Fond**: Introduzione        |         | **Reti: intro**<br>+ **Fond**: Macchine di turing |         | **Reti: APP**               | **Fond:**<br>Ripasso | **Reti**: Es. HTTP<br>Es. Capitolo 1<br>Es. DNS     |
-| 1a: **agosto**  | **Fond**: Es. Macchine Turing |         | **Reti: Livello TRA.**                            |         | **Reti**: Es. UDP + Ripasso |                      | **Reti: Livello RETE**                              |
-| 2a              |                               |         | **Reti**: Es. Socket UDP, TCP, rete, ping         |         | **Reti: Livello LINK**      |                      | **Reti:** Es. traceroute, ip addr, arp, virtual net |
-| 3a              |                               |         | **Reti**: **ripasso**                             |         | **Reti: Wireles**           |                      | Reti: Es. invio host, indirizzi, nc, vari           |
-| 4a              |                               |         |                                                   |         |                             |                      |                                                     |
-|                 |                               |         |                                                   |         |                             |                      |                                                     |
-|                 |                               |         |                                                   |         |                             |                      |                                                     |
-|                 |                               |         |                                                   |         |                             |                      |                                                     |
+
+|                   | Lunedi | Martedi                  | Mercoledi                                            | Giovedi | Venerdi                  | Sabato                                              | Domenica                                                        |
+| ----------------- | ------ | ------------------------ | ---------------------------------------------------- | ------- | ------------------------ | --------------------------------------------------- | --------------------------------------------------------------- |
+| 1a: **28 luglio** | ...    | **Fond**: ~~Dispensa 1~~ | **Reti: intro**<br>~~+ **Fond**:~~<br>~~Dispensa 2~~ |         | **Reti: APP**<br>**Lmp** | **Fond:**<br>Ripasso da slide e Esercizi<br>**Lmp** | **Reti**: ~~Es. HTTP~~<br>~~Es.~~ ~~Capitolo 1~~<br>~~Es. DNS~~ |
+|                   |        |                          |                                                      |         |                          |                                                     |                                                                 |
+
+|                  | Lunedi                              | Martedi                        | Mercoledi                                                      | Giovedi            | Venerdi                                            | Sabato  | Domenica                                                                         |
+| ---------------- | ----------------------------------- | ------------------------------ | -------------------------------------------------------------- | ------------------ | -------------------------------------------------- | ------- | -------------------------------------------------------------------------------- |
+| 1a: **4 agosto** | ~~**Fond**:~~<br>~~Disp~~ensa 3<br> |                                | **Reti: Livello TRA.** + **Fond**: Esercizi accettabilita      |                    | **Reti**: Es. UDP + Ripasso<br>**Fond**: ripasso   |         | **Reti: Livello RETE**.<br>**Lmp**                                               |
+| 2a               | **Fond**:<br>Dispensa 5<br>**Lmp**: |                                | **Reti**: Es. Socket UDP, TCP, rete, ping<br>**Fond**: Ripasso |                    | **Reti: Livello LINK**<br>**Fond**: disp. 11-13-14 | **Lmp** | **Reti:** Es. traceroute, ip addr, arp, virtual net.<br>**Fond**: disp. 15-16-17 |
+| 3a               | **Fond**: ripasso 11-17<br>**Lmp**  | **Fond**: Ripasso dispense 1-5 | **Reti**: **ripasso**<br>**Fond**: Ripasso generale<br>        |                    | **Reti: Wireles**<br>**Fond**: dispensa 6<br>      | **Lmp** | "Reti: Es. invio host, indirizzi, nc, vari"<br>**Fond**: dispensa 6 + 7          |
+| 4a               | **Fond**:<br>dispensa 8 + 9         | **Fond**: ripasso              | **Reti:** ripasso<br>**Fond**: ripasso                         | **Fond**: esercizi | **Fond**: esercizi<br>**Lmp**                      |         | **Reti: ripasso**<br>**Lmp**                                                     |
+| 1a **Sett**      | **Fond**                            | **Reti: ripasso**<br>**Fond**  | **Fond**                                                       | **Fond**           |                                                    |         |                                                                                  |
+| 2a               |                                     |                                |                                                                |                    |                                                    |         |                                                                                  |
+| 3a               | **Lmp**                             | **Lmp**                        | **Lmp**                                                        | **Lmp**            | **Lmp**                                            | **Lmp** | **Lmp**                                                                          |
+| 4a               | **Lmp**                             | **Lmp**                        | **Lmp**                                                        | **Lmp**            | **Lmp**                                            | **Lmp** | **Lmp**                                                                          |
 
 # reti
 
