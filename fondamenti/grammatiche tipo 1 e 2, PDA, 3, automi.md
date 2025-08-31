@@ -11,7 +11,7 @@ Per l'osservazione, allora posso progettare $NT'_G$ che **decide** se $x$ e' gen
 Potrebbero nascere dei **loop di produzioni**: la lunghezza non aumenta mai, quindi $NT'_G$ *non e' in grado di rigettare*. 
 
 *Ma come riconosco di essere in un loop?*
-> **Soluzione**: se ho generato $|V_{T}\cup V_{N^{k}}| +1$ parole della **medesima** lunghezza $k$, allora le ho generate tutte, se vado in loop sicuramente ne genero una più volte.
+> **Soluzione**: se ho generato $|V_{T}\cup V_{N}|^{k} +1$ parole della **medesima** lunghezza $k$, allora le ho generate tutte, se vado in loop sicuramente ne genero una più volte.
 
 Allora costruiamo $NT'_G$:
 * ha un nastro che ricorda il valore: $|V_{T}\cup V_{N}^{|x|}|$ 
@@ -97,27 +97,21 @@ Poiché $|vwx| \leq p_L$, il carattere $a$ più a destra e la $c$ più a sinistr
 
 
 ## PDA
-> [!note] PDA
-> e' un modello di calcolo costituito da:
-> * **unita di controllo**: simile a turing. Se in $q_0$ inizia la computazione, se in $Q_F$ termina.
-> * **coppia di nastri semi-infiniti**: infinite celle, ciascuna contiene un simbolo di $\Sigma$ sul primo nastro e di $\Gamma$ sul secondo nastro.
-> * ad ogni istante vengono applicate le azioni specificate da $\delta$
-> * $\Sigma \cap \Gamma = \emptyset$.
-> 
-> $PDA = <\Sigma, \Gamma, Z_{0}, Q, Q_{F}, q_{0}, \delta>$
+
+> [!note]
+> $PDA = <\Sigma, \Gamma, Q, Q_{F}, q_{0}, Z_{0}, \delta>$ e' un modello di calcolo costituito da:
+> * unita di controllo
+> * **2 nastri**: $n_1$ opera su alfabeto $\Sigma$ e $n_2$ su $\Gamma$
+> * **2 testine**: la testina su $n_{1}$ e' posizionato sul *carattere piu a sinistra*, mentre $n_{2}$ e' posizionato sul *carattere piu a destra*. **Sempre!**
+> * $\delta: Q \times (\Sigma \cup \{\epsilon\}) \times \Gamma \to \mathcal P(Q \times \Gamma^*)$ che server per decidere quale quintupla eseguire.
+> * Nota: il 2o nastro e' gestito con politica **FIFO**
+
+Ci sono due casi per l'esecuzione delle quintuple:
+* se $(q_{1}, y) \in \delta(q_{0}, a, Z)$ allora viene sovrascritto il primo carattere sul secondo nastro con $Z$, su $n_1$ la testina si sposta a destra
+* se $a=\epsilon$, allora la testina sul primo nastro sta **ferma**.
+* se $y = \epsilon$, allora la testina sul secondo nastro **cancella** il *simbolo in cima alla pila*.
+
+> Le $PDA$ accettano le grammatiche di tipo 2.
 
 
-Il primo nastro e' l'input: $x \in \Sigma^*$, nastro di sola lettura, e la testina si muove a destra, **mai a sinistra**.
-
-Il secondo nastro contiene un solo carattere speciale di $\Gamma$, indicato con $Z_0$ gestito con politica $LIFO$ (Last In First Out): per leggere il carattere a sinistra, bisogna cancellare prima quello a destra! Nota che la testina e' sempre posizionata sul carattere piu a destra.
-
-> [!note] $\delta$
-> La funzione di transizione e' definita come: $\delta: Q \times (\Sigma \cup \{\epsilon\}) \times \Gamma \to \mathcal P (Q \times \Gamma ^*)$.
-> Ossia, ad ogni stato e carattere letto sui due nastri corrisponde una nuova parola $\Gamma^*$ e un nuovo stato.
-> $\mathcal P$: insieme delle parti
-
-> PDA: non e' deterministico, scelgo l'azione da compiere da un'insieme.
-
-Con: $(ax, \beta Z, q_1)$ lo stato del PDA e con $x \in \Sigma^*$ e $\beta \in \Gamma ^*$, allora si sceglie una $(q_{2}, \gamma) \in \delta(q_{1}, a, Z) \cup \delta(q_{1}, \epsilon, Z)$. 
-
-* se scelgo $(q_{2}, \gamma) \in \delta(q_{1}, a, Z)$ allora: mi muovo a destra sul primo nastro, dopo aver cancellato il carattere letto. $Z$ sulla pila viene cancellato e scrivo $\gamma$, mi sposto sul secondo nastro alla fine di $\gamma$.
+## grammatica tipo 3

@@ -7,59 +7,112 @@ Il layer di applicazione e' molto ampio in termini di protocolli offerti e varia
 * Protocollo tipo pull o push?
 * Conessione sicura, criptata?
 
-Questo layer e' implementato solo agli estremi della rete! (Ma anche nel nucleo dato che spesso i fornitori di  servizi per essere efficienti si collocano nel nucleo della rete).
+> Questo layer e' implementato solo agli **estremi della rete**! 
 
-Questo vuol dire che al nucleo della rete non interessa il tipo di pacchetto, perche' il nucleo pensa solo ad inoltrarlo.
+> **Nota**: al nucleo della rete sono collegati direttamente anche i **fornitori di servizi** (es: Netflix, Google, ecc...) cosi da essere piu vicini agli utenti! 
 
-Molti protocolli del Layer di Applicazione sono standardizzati: `HTTP, DNS, IMAP, POP3` ma potrei benissimo creare un mio protocollo -> devo decidere come interpretare i bit!
+> Al nucleo della rete **non interessa il tipo di pacchetto**, perche' il nucleo pensa solo ad **inoltrarlo**.
+
+Molti protocolli del Layer di Applicazione sono standardizzati: `HTTP, DNS, IMAP, POP3` ma potrei benissimo creare un mio protocollo, *ossia devo decidere come interpretare i bit*!
 
 ## paradigma server/client
-In questo paradigma ci sono due attori: un client che dialoga ,spesso facendo richieste e attendendo risposte, con un server.
-In questo paradigma il server non conosce a priori l'indirizzo IP dei client, mentre i client devono conoscere l'IP del server in modo da inviare a questo i pacchetti.
+In questo paradigma ci sono due attori: 
+* un **client** che dialoga ,spesso facendo richieste e attendendo risposte, da un server.
+* un **server** che fornisce il servizio e risponde alle richieste. 
+
+> **Nota**: il server non conosce a priori l'indirizzo IP dei client, mentre i client devono conoscere l'IP del server in modo da inviare a questo i pacchetti.
 
 ### paradigma peer to peer
-Non ci sono client o server, ma solo pari dato che ogni host offre un servizio e riceve servizio dagli altri pari (es: condivisione di un file).
+Non ci sono client o server, ma solo **pari** dato che *ogni host offre un servizio e riceve servizio dagli altri pari* (es: condivisione di un file).
 
-Quindi se un servizio aumenta il numero di peer che partecipano contribuendo alla rete: la scalabilita e' intrinseca. Aumentano i peer = aumenta la quantita di servizio offerto = aumenta la quantita di servizio richiesto. Questo approccio e' inoltre decentralizzato: non c'e' un server principale (o un datacenter) che detiene un'unica copia dei file.
+> **scalabilità intrinseca**: all'aumentare dei peer aumenta il *servizio offerto* ma anche la complessità della rete e il *servizio richiesto*.
 
-# api
-Come realizzo un'applicazione che dialoga con la rete? Si utilizzano le `socket`, ossia un'astrazione che rappresenta una porta virtuale nel computer, attraverso la quale entrano ed escono bit. L'astrazione della `socket` e' offerta ed implementata di solito dal sistema operativo, che si occupa anche di implementare i protocolli `TCP` e `UDP` per il trasporto sottostanti.
+> **decentralizzato**: chi offre il servizio e' dislocato nella rete e si muove! non c'e' un **datacenter**!
 
+### api, processi comunicanti e protocolli
+La rete si occupa di far comunicare **processi** su end-**point differenti**, grazie ad una `API` di rete, ossia le `socket`. Le `socket` permettono di inviare e ricevere i messaggi del livello di applicazione.
+
+> [!note] socket
+> Rappresenta una **porta virtuale** attraverso la quale entrano ed escono bit.
+> *E' implementata dal sistema operativo che implementa il protocollo di trasporto sottostante.*
+
+Per inviare un messaggio usando le socket bisogna conoscere dove e' localizzata l'altra socket: ossia l'indirizzo ip dell'end-point e la sua porta.
+
+> Mentre l'indirizzo ip e' variabile, **il numero di porta e' standardizzato**, per esempio i server HTTP si trovano sempre su porta 80.
+
+Ma quale servizio di trasporto conviene usare? Si sceglie in base a:
+* tolleranza alla **perdita di dati**
+* tolleranza del **ritardo**
+* tolleranza della variazione del **troughtput**
+* e altre cose che vedremo piu avanti...
 # http
-E' un protocollo basato su TCP, hostato generalmente su porta 80, senza stato. L'oggetto di richieste e risposte in HTTP sono le risorse web: un'astrazione che comprende immagini, file html, file css, file javascript che vengono gestiti normalmente da un browser.
+* basato su **TCP**
+* porta 80
+* per richiedere di **oggetti**  o **risorse** Web.
+* **stateless**: il server non mantiene uno storico dei messaggi inviati.
+* **ASCII**: leggibile dall'utente.
 
-Ogni risorsa e' identificata da un URL: `www.hostname.it/path/to/resource` costituito da `schema|hostnam|path alla risorsa`.
+> [!note] risorsa web
+> E' un **file** (javascript, html, immagine, ecc...) che viene generalmente *inviato dal server come risposta* al cliente a seguito di una richiesta.
+> 
+> Ogni risorsa e' identificata da: `schema|hostname|path`, ossia `www.hostname.it/path/to/resource`.
 
-### rtt
-dato che http non e' persistente, la connessione viene chiusa dopo ogni richiesta, quindi ci vogliono almeno `2RTT` per ottenere una risposta, `1RTT` per le prime due fasi dell'handshake. `1RTT` per confermare la connessione da parte del cliente inviando in allegato la richiesta e per ottenere la risposta. Quindi per richiedere 10 oggetti ho bisogno di 20 rtt.
+> [!note] RTT
+> Tempo impiegato da un pacchetto piccolo per andare dal client e tornare al server includendo tutti i ritardi.
+
+In `HTTP` per ogni richiesta ci vogliono **almeno** `2RTT`:
+* uno per la richiesta di connessione `TCP` (`handshake TCP`)
+* un'altro per richiedere la risorsa
+* piu' il *tempo per trasmettere la risorsa*.
 
 Oppure posso richiedere piu oggetti in una sola richiesta e attendere l'invio di questi uno dopo l'altro.
 
+E' possibile pero:
+* aprire piu connessioni insieme
+* usare una **connessione persistente**
+
 ### richiesta http
-Una richiesta http e' formata da una riga di comando, righe di intestazione e un body, il tutto codificato in ASCII, quindi http e' human readable
+* riga di **comando**
+* righe di **intestazione**
+* **body**: inizia dopo una riga vuota!
+
+> Ogni riga e' terminata da `\r\n`.
 
 Si presenta tipo cosi:
 ```http
-GET /path/to/url HTTP/1.1
-Host: www.uniroma2.it
+GET /path/to/url HTTP/1.1\r\n
+Host: www.uniroma2.it\r\n
 UserAgent: LadyBird 0.2
 Accept: (media type)
 Accept-Language: it
 Accept-en: utf8
-
+\r\n
 data...data...data...
 ```
-La prima riga indica il comando che oltre a `GET` puo' essere `PUT,HEAD,POST`. Dove con `POST` si manda input utente codificato nell'URL di solito, `HEAD` e' come `GET` ma dice al server di mandare solo l'header, `PUT` serve  per caricare una risorsa.
-* `HEAD`, `GET`, `PUT` sono operazioni `IDEM POTENTI`, ossia hanno sempre lo stesso effetto nel server.
-* Ogni riga e' terminata da `\r\n`
-* Una riga vuota, ossia contenente solo `\r\n` indica l'inizio del body.
+La prima riga indica il comando che oltre a `GET` puo' essere `PUT,HEAD,POST`. 
+
+>Con `POST` si manda input utente codificato nell'URL di solito.
+
+>`HEAD` e' come `GET` ma dice al server di mandare solo l'header, 
+
+>`PUT` serve  per caricare una risorsa.
+
+Nota che: `HEAD`, `GET` e `PUT` sono operazioni `IDEM POTENTI`, ossia hanno sempre lo stesso effetto nel server.
+
+Nell'intestazione troviamo alcuni campi come:
+* `Host`: ossia l'hostname a cui ci riferiamo, fondamentale per `web-cache` e `name-based virtual hosting`.
+* `User-Agent`: il software (incluso sistema operativo) che sta effettuando la richiesta.
+* `Accept`: che tipi di risorse accetto come risposta
+* `Accept-Language`: che lingua...
+* `Accept-Encoding`: che encoding...
+* `Connection`: voglio chiuderla o lasciarla aperta?
 
 ### risposta http
 La risposta http e' fatta tipo cosi:
 ```http
 HTTP /1.1 200 OK
-Server: 
 Date: ieri pomeriggio
+Server: 
 Accept-Ranges:
 Content-Type:
 Content-Length:
@@ -67,44 +120,126 @@ Content-Length:
 ...dbody...
 ```
 
+Nell'header troviamo:
+* `Date`: data e ora di risposta.
+* `Server`: software che esegue il server
+* `Last-Modified`: ultima modifica alla risorsa secondo il server
+* `Accept-Ranges`: boh
+* `Content-Length`: lunghezza in byte dell'entità inviata.
+* `Content-Type`: tipo di risorsa!
+
 dove i codici sono:
 * `1xx`: informativi
 * `2xx`: richiesta soddisfata senza problemi
 * `3xx`: il client deve fare altre azioni per soddisfare la richiestae (es. risorsa spostata)
 * `4xx`: errore da parte del client, richiesta formulata male
-* `5xx`: errore da parte del server, qualcosa e' andato storto!
+* `5xx`: errore da parte del **server**, qualcosa e' andato storto!
 
-# cookie: facciamo diventare http con storia 
+esempi di codici:
+* `200`: `OK`
+* `301`: `Moved Permanently`
+* `400`: `Bad Request`
+* `404`: `Not Found`
+* `406`: `Not Acceptable`
+* `505`: `HTTP Version Not Supported`
+## cookie
+Si usano per mantenere uno storico delle transazioni usando:
+* riga di intestazione nella risposta (`Set-Cookie`)
+* riga di intestazione nella richiesta
+* *cookie mantenuto sistema dell'utente*
+* **database** sul sito
+
+Quando viene fatta una richiesta `HTTP`, se non e' fornito un cookie, il server genera un identificativo per te specificando nella risposta per esempio `set-cookie: 1678`. 
+
+L'utente ricorda il suo cookie per quel sito e il server associa a quell'cookie u*n'identità digitale e crea una voce per te nel suo database*.
+
+I cookie sono usati per:
+* gestire autorizzazioni
+* ricordare il carrello degli acquisti
+* **ricordare preferenze utente**
+
+Es: un sito web di annunci `A`, ti fornisce il cookie da usare per lui. Lo stesso sito web e' inglobato in altre pagine, quindi `A` viene caricato nella tua pagina inconsapevolmente, ed `A` sa chi sei, e quali pagine hai visitato!
+
+`A` potrebbe avere un database del tipo:
+```
+1678: www.amazon.com/calzini 2/15/22
+1678: www.youtube.com/favijtv 2/16/22
+ecc...
+```
+Dove `1678` e' il tuo cookie!
+
+Questo e' un **cookie di terze parti**: ossia ti traccia su piu siti!
+
+## Web Cache
+* e' **locale**
+* **configurata** dall'utente
+* **cattura** le richieste `HTTP` e *risponde al posto del server* se l'oggetto e' in cache
+* se non possiede l'oggetto, *lo richiede al server d'origine*. 
+
+Perché' introdurre una cache?
+* ridurre tempi di **risposta**, dato che la cache e' vicina al client.
+* **scenario**: tra i client e il server c'e' un collegamento che fa da **bottleneck**.
+# `E-mail`: `SMPT`
+Ci sono tre figure principali:
+* **user agent**: scrive, e legge i messaggi, che sono memorizzati su un server.
+* **mail server**: ha una `mailbox`e una `coda dei messaggi` da trasmettere, inviati da un `user agent`
+* `SMPT`: Simple Mail Transfer Protocol
+
+Il protocollo `SMPT`:
+* usa `TCP`, porta 25. quindi `3-way-handshake` e chiusura della connessione.
+* **persistente**.
+* orientato al **client push**
+* `ASCII`
+
+Un'interazione `SMTP` e' tipo cosi:
+* `Server:` invia `200`
+* `Client`: invia `HELO crepes.fr`
+* `Server`: `250 Hello crepes.fr, pleased to meet you`
+* `Client`: `MAIL FROM <...>`
+* e cosi via...
+
+Con `DATA` il client inizia a inviare il corpo del messaggio, riga per riga.
+
+> **Nota**: Si finisce di trasmettere il corpo quando il client invia una riga contenente solo il simbolo `.`, ossia la sequenza `CRLF.CRLF`
+
+> **Nota**: per inviare un `.` all'inizio di una riga il cliente manda una sequenza di due punti: `..`
+
+Con `SMTP` i messaggi vengono scambiati tra **server**.
+Con `IMAP` o con `HTTP` il client ottiene i messaggi dal **server**.
+
+# `DNS`
+Vogliamo poter risolvere gli `hostname` in indirizzi ip, per esempio in `/etc/hosts`:
+```hosts
+185.300.10.1 host1
+185.300.10.2 host2 ziocane
+185.300.10.3 ...
+...
+```
+
+Negli anni 70, c'era `HOSTS.TXT`, un'unico file da scaricare per poter risolvere gli host name ma e' una soluzione **poco scalabile** e scomoda per miliardi di dispositivi.
+
+> [!note] DNS
+> E' un database distribuito su piu server organizzati **gerarchicamente**.
+> E' un **protocollo** a livello di applicazione che permette la risoluzione dei nomi, e' un sistema fondamentale per il funzionamento di internet.
+
+DNS offre:
+* traduzione hostname
+* host aliasing
+* mail server aliasing
+* load distribution: re indirizzamento in base al carico.
+
+L'organizzazione gerarchica prevede:
+* un'insieme di server **root** 
+* dei server **Top Level Domain** (`.com; .it; .en; ecc...`)
+* dei server **Autoritativi**: esiste un server autoritativo per i siti di `amazon`, per `google`, ecc.... 
+
+> **Nota**: I DNS Autoritativi, *Sono propri di ciascuna organizzazione, e forniscono i mapping ufficiali da host-name a IP.*
+
+> I `root DNS` sono gestiti dal'`ICANN`.
+
+La richiesta DNS va al `DNS locale` (indicato di default)
 
 
-# domande
-
-## **DOMANDA 1 - EMAIL & SMTP**
-
-Spiega il processo completo di invio di un'email da Alice a Bob, includendo:
-
-- I componenti coinvolti
-- Le fasi del protocollo SMTP
-- La differenza tra SMTP e HTTP in termini di push/pull
-- Cos'è il "dot-stuffing" e perché è necessario?
-
-In Email, in particolare il protocollo SMPT le componenti coinvolte sono i server di posta e non gli utenti che detengono la casella di posta. Una casella di posta deve essere sempre operativa per poter accettare sempre i messaggi e questo meccanismo e' proprio del del server che riceve richieste e le soddisfa. Gli utenti per accedere alla casella di posta e comandare il server devono fare accesso a quest'ultimo tramite un'altro protocollo: `POP3, IMAP, HTTP` (un sito web sul server di posta). Il protocollo `SMPT` e' una connessione TCP permenente (a differenza di HTTP che spesso chiude la connessione appena e' stata soddisfatta la richiesta): il cliente invia comandi tipo `HELO, MAIL FROM, RCP TO` mentre il server ripsonde con codici e descrizioni. I messaggi sono codificati usano ASCII, quindi il protocollo e' umanamente leggibile e interpretabile.
-
-Es di iterazione tra server di posta `A` e server di posta `B`:
-* `A` instaura connessione con `B` mandando comando `HELO`
-* si spera che `B` risponda con un OK 
-* `A` manda il comando `MAIL FROM`
-* dopo un `OK` (che corrisponde ad un codice specifico) invia `RCPT TO`
-* `B` accetta e chiede ad `A` di inserire il corpo dell'email, dove la sequenza `\n\r.\n\r` indica la fine del messaggio: ossia una riga con un solo punto
-* `A` comincia ad inviare riga per riga il messaggio e termina la comunicazione con un `.`
-* `A` puo' scegliere se inviare un nuovo messaggio (non come http che ti manda subito a fanculo) oppure di chiudere la connessione
-Successivamente all'invio, l'utente che detiene la casella di posta  di destinazione, puo' connettersi al server`B` usando `IMAP`.
-
-`SMTP` e `HTTP` differiscono per il modello di servizio
-* in `HTTP` il client spesso richiede al server delle risorse (`pull`)
-* in `SMTP` spesso il client (che e' un server) manda messaggi di posta ad un'altro server (`push`)
-  
-Per `dot-stuffing` si intende la gestione del `.`. Quando si vuole inserire un `.` nel corpo del messaggio, basta inserire una sequenza di due punti, che verra' interpretata come un solo punto. 
 ## **DOMANDA 2 - DNS**
 
 Descrivi l'architettura gerarchica del DNS:

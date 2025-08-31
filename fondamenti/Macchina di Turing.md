@@ -114,21 +114,26 @@ Per trasformare un riconoscitore in un trasduttore basta includere $q_{A}$ e $q_
 * $<q_{R}, (x_{1},...,x_{n}, \square), (x_{1}, ..., x_{n}, q_{R}), q_{F}, \text{fermo}>$
 ossia se sono in stato di accettazione nel trasduttore, allora scrivo $q_A$ nel nastro di output, altrimenti scrivo $q_R$, ovviamente mi aspetto sempre di leggere blank sul nastro di output.
 
+#### Simulazione
+Vogliamo creare $T$ che risolve un problema, mentre la costruiamo ci accorgiamo che molto del lavoro di $T$ puo' essere fatto da $T'$ che gia abbiamo in cantina...
+
+Due modi per usare $T'$:
+* $T$ entra nello stato iniziale di $T'$
+* Per ogni stato in $Q_F$ di $T'$ aggiungiamo delle quntuple per riprendere l'esecuzione di $T$ da prima di entrare nello stato iniziale di $T'$ 
+
 ## Struttura di $P$
 Possiamo che $P$ e' una corrispondenza: $\mathcal Q \times \Sigma \to \mathcal Q \times \Sigma \times \{\text{sinistra , destra, ferma}\}$, ma di che tipo?
 ### Totalita
 > [!note] Totalita
 > E' vero che per ogni  $(q_{1},s_{1}) \in (\mathcal Q - \mathcal Q_{F}) \times \Sigma$ allora esiste la tripla $(s_{2}, q_{2}, m) \in \Sigma$ per cui $<q_{1}, s_{1}, s_{2}, q_{2}, m> \in P$? Non e' detto, per esempio consideriamo il caso in cui si legge un input non valido, allora la macchina non fa nulla.
 
-Una macchina di Turing, sia riconoscitore che trasduttore potrebbe non aver previsto certe condizioni (errori, input errato), per cui la macchina si potrebbe bloccare, ossia non trovare quintuple da eseguire e non essere in uno stato finale.
+Analizziamo la funzione $\delta(q,s)$ che mette in corrispondenza lo stato di $T$, con il simbolo, lo stato e il movimento da eseguire, se questo valore non e' definito allora la macchina $T$ si arresta, ma potrebbe arrestarsi in uno stato non finale in caso di input errato o che sia stata programmata male.
 
-In questo caso, $P$ **non e' totale**. Possiamo pero' trasformare $P$ in modo tale da essere totale aggiungendo le istruzioni $<q,s,s,q_{R},\text{fermo}>$, per le coppie $(q,s)$ che non sono gestite da $P$, e quindi in questi casi, la **macchina non si arresta**!
+**Per i trasduttori**: l'output della macchina se si arresta male, potrebbe essere incompleto o errato, quindi per tutte le coppie $(q,s) \notin D_{\delta}$  (ossia non nel dominio di delta), aggiungiamo le quintuple: $(q,s,s, q_{R}, f)$, dove $q_R$ e' un nuovo stato finale.
+Dunque $o_T(x)$ rimane **invariato**, e la macchina termina sempre in uno stato finale!
 
-Dopo aver modificato $P$, $o_T(x)$ rimane invariato.
+**Per i riconoscitori**: se la macchina si arresta in $q_{i} \notin Q_{F}= \{q_{A}, q_{R}\}$, non possiamo ancora dire nulla circa l'output, ma sappiamo sicuramente che qualcosa e' andato storto, quindi ci conviene come prima aggiungere le quintuple $(q,s,s,q_{R},f)$, pero' l'output ora e' diverso! $o_T(x)$ ora rigetta anche in caso di errore!
 
-Abbiamo imparato che per evitare casini, l'input deve rispettare le specifiche della macchina!
-
-**Quindi**: la corrispondenza totale e' verificata.
 
 > **Nota**: si assume che la computazione $T(x)$ non termini mai per input che non rispetta le specifiche della macchina.
 
@@ -152,14 +157,22 @@ Nella macchina $NT$, $o_{T}(x)$ e':
 * $q_R$ se **tutte** le computazioni non accettano
 * non definito se altrimenti.
 
+> **Nota**: questa asimmetria tra accetto e rigetto ha delle importanti conseguenze nello studio della complessita!
+
+> Nota: per **non deterministica** si intende che l'output, dipende dalla strada scelta, non dipende interamente dall'input.
+
 > La **formulazione** del `genio burlone pasticcione`, vuole l'intervento di questo genio che scelga la quintupla di eseguire in caso di piu di queste.
 > La computazione e' non deterministica e il risultato dipende dalle scelte del `genio`, la computazione rigetta dunque, se e solo se tutte le scelte possibili rigettano.
+
+> [!note] grado di non determinsmo
+> Il numero massimo di quintuple che iniziano con la stessa coppia $(q,x)$ in $P$. Questo valore e' al massimo $|\Sigma| \times |Q| \times 3$, ossia 3 movimenti per ogni coppia di $(q_{1}, x_{1})$.
+
 
 **Teorema 2.1**: per ogni macchina $NT$, esiste $T$, tale per cui l'esito della computazione di $NT(x)$ coincide con $T(x)$.
 
 *Dimostrazione*: con la tecnica della **simulazione**, possiamo usare $T$ che simula ogni ramificazione di $NT$, fino a che non trovo una foglia che accetta! Usiamo la simulazione a **coda di rondine**: simulo l'albero per $k=0$ stati, e al passo successivo incremento $k$ di 1. (ossia, simulo tutte le computazioni di lunghezza $k$)
 
-> Nota: bisogna simulare in ampienza (e non in profondita) perche' potrebbero esserci computazioni che non terminano!
+> Nota: bisogna simulare in **ampienza** (e non in profondita) perche' potrebbero esserci computazioni che non terminano!
 
 ## $TM$ a un nastro e $k$ nastri, solidali e non.
 Una macchina $T_k$ a $k$ nastri può essere simulata da $T_1$ a 1 nastro? O meglio, *posso fare in modo che entrambe calcolino la stessa funzione?*
@@ -222,6 +235,9 @@ Poi riavvolgo e sovrascrivo i caratteri: usando gli stati $q(\sigma, k)$ per cap
 E infine vado a simulare l'insieme $P_2$ che si occupa di muovere correttamente la testina:
  * $m=f$, allora passo a $q'$, tanto sono gia tornato indietro.
  * $m=s$, allora devo spostarmi di sinistra sfruttando gli stati $q^{mv}(\sigma, k-2)$, per qualsiasi simbolo $a \in \{\square, 0, 1\}$
+
+### da $\Sigma$ ricco a $\Sigma = \{0,1\}$
+Dotiamo $T$ di $k = log_{2}(|\Sigma|)$ (parte intera superiore) nastri, in modo che con una sola lettura su piu nastri, riesco a codificare piu roba.
 ## simulazione a scatola chiusa
 Immaginando di avere due macchine: $T_{PPAL}$ e $T_{DPAL}$, che accettano rispettivamente: l'insieme delle parole di lunghezza pari palindrome, e l'insieme delle parole di lunghezza dispari palindrome, vogliamo creare $T_{PAL}$ che data in input una qualsiasi parola, controlla che questa sia palindroma. (sono state progettate nella Lezione 3)
 

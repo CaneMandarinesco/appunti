@@ -220,5 +220,3 @@ uniroma2.it
 ```
 
 > `Nota`: `uniroma2.it` e' un dominio e il suo server autoritativo gestisce la traduzione anche per `web.uniroma2.it`!
-
-## es 7
