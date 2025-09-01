@@ -280,3 +280,5 @@ Per quanto riguarda il tempo:
 
 
 > **Nota**: Possiamo usare come certificato per l'istanza $x$ di $\Gamma$: $y \in S(x)$
+
+# 
