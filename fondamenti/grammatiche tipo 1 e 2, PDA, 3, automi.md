@@ -115,3 +115,39 @@ Ci sono due casi per l'esecuzione delle quintuple:
 
 
 ## grammatica tipo 3
+
+### Teo G.14
+$\forall ASFD \; A = <\Sigma, Q, q_{0,}Q_{F,}\delta>$ allora esiste una grammatica $G_{A}= <V_{T},V_{N},A_{0}, P>$ tale che $L(A) = L(G_A)$.
+
+Infatti, posso costruire a partire da $A$ la grammatica $G_A$ tale che:
+* $\forall q_{k} \in Q, a \in Sigma [\forall q_{i} \in \delta(q_{k}, a) \text { allora } A_{k} \to aA_{i} \in P]$.
+* e similmente per $q_i$ stato finale, ecc...
+
+Con $V_{T}=\Sigma$ e con $Q = \{q_{0}, q_{1}, ..., q_{k}\}$ allora $V_{N}=\{A_{0}, A_{1}, ..., A_{k}\}$ dove $A_0$ e' l'assioma.
+
+### Teo G.15
+Per ogni grammatica $G=<V_{T},V_{N},P,S>$ esiste un $ASFND$ $A_{G}= <\Sigma, Q, q_{0}, Q_{F}, \delta>$ tale che $L(G)=L(A_{G})$.
+
+Con $\Sigma = V_{T}$ allora per ogni produzione in $G$ del tipo $A_{k} \to aA_{i}$, allora $q_{i} \in \delta(q_{k},a)$ dove.
+
+Se ho $A_{k}\to a$ allora $q_{i} \in \delta(q_{k}, a)$ dove $q_i$ e' stato finale.
+Se ho $A_{0}\to \epsilon$ allora $q_{F}\in \delta(q_{0}, \square)$.
+
+Dunque per costruzione, ad ogni grammatica che genera $x$, allora esiste una computazione deterministica di $A_G$ che accetta quella parola, ossia $A_G$ riconosce determinate sequenze di parole che appartengono a $G$.
+
+### Teo G.16
+Per ogni $ASFND \;NA = <\Sigma, Q, q_{0}, Q_{F}, \delta>$ esiste un $ASFD A = <\Sigma_{D}, Q_{D}, q_{0D}, Q_{FD}, \delta_{D}>$ tale che $L(NA)=L(A)$
+
+Con $Q_{D}= 2^Q$, ossia ogni stato di $Q_D$ e' un sottoinsieme degli stati di $NA$, e con $q_{0D} = \{q_0\}$ e con $Q_{FD} = \{Q' \subseteq Q: Q' \cap Q_{F}\neq \emptyset\}$ e $\forall a \in \Sigma \text{ e }\omega \in Q_D$ allora $\delta_{D}(\omega, a) = \bigcup_{q\in Q}\delta(q,a)$
+
+### chiusura del tipo 3
+E' chiusa rispetto all'**unione**, infatti $L_{1} \cup L_{2}$ puo' essere deciso da $ASFND$ che usa $A_{1}$e $A_{2}$.
+
+E' chiusa rispetto al complemento, infatti $L^C$ puo' essere deciso da $ASFND$ $NA$, ma allora esita $ASFD$ $A$ che decide $L$, dunque posso invertire gli stati finale di $ASFD$ per accetta
+
+E' chiusa rispetto all'intersezione, infatti $L_{1} \cap L_{2} = (L_{1} \cup L_2)^C$.
+
+
+
+
+

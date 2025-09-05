@@ -1,4 +1,4 @@
-> Quanti sono gli algoritmi? Proviamo a contarli usando i numeri transfiniti di cantor, o meglio, che cardinalita ha l'insieme degli algoritmi?
+ > Quanti sono gli algoritmi? Proviamo a contarli usando i numeri transfiniti di cantor, o meglio, che cardinalita ha l'insieme degli algoritmi?
 
 Dato che ad ogni algoritmo corrisponde una `macchina di Turing`, allora proviamo a enumerare l'insieme $\mathcal T$ definite sul alfabeto $\{0,1\}$ e a singolo nastro, più uno di output.
 

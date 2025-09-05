@@ -8,3 +8,4 @@
 * [[complessita]]
 * [[complessita problemi e codifiche e classe NP]]
 * [[np completezza cook-levin problemi np]]
+* [[esercizi np]]
