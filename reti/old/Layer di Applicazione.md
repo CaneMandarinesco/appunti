@@ -184,6 +184,7 @@ Ci sono tre figure principali:
 * **user agent**: scrive, e legge i messaggi, che sono memorizzati su un server.
 * **mail server**: ha una `mailbox`e una `coda dei messaggi` da trasmettere, inviati da un `user agent`
 * `SMPT`: Simple Mail Transfer Protocol
+* `IMAP`: Internet Mail Access Protocol
 
 Il protocollo `SMPT`:
 * usa `TCP`, porta 25. quindi `3-way-handshake` e chiusura della connessione.
@@ -194,9 +195,11 @@ Il protocollo `SMPT`:
 Un'interazione `SMTP` e' tipo cosi:
 * `Server:` invia `200`
 * `Client`: invia `HELO crepes.fr`
-* `Server`: `250 Hello crepes.fr, pleased to meet you`
+* `Server`: `250 Hello crepes.fr, pleased to meet you`. Qui si conclude l'**handshaking** `SMPT`.
 * `Client`: `MAIL FROM <...>`
-* e cosi via...
+* e cosi via, fino alla chiusura della connessione
+
+![[Pasted image 20250906152153.png]]
 
 Con `DATA` il client inizia a inviare il corpo del messaggio, riga per riga.
 
@@ -206,6 +209,8 @@ Con `DATA` il client inizia a inviare il corpo del messaggio, riga per riga.
 
 Con `SMTP` i messaggi vengono scambiati tra **server**.
 Con `IMAP` o con `HTTP` il client ottiene i messaggi dal **server**.
+
+Con `MIME` posso includere nel corpo della mail oggetti più complessi, come codice `html`.
 
 # `DNS`
 Vogliamo poter risolvere gli `hostname` in indirizzi ip, per esempio in `/etc/hosts`:
@@ -220,7 +225,10 @@ Negli anni 70, c'era `HOSTS.TXT`, un'unico file da scaricare per poter risolvere
 
 > [!note] DNS
 > E' un database distribuito su piu server organizzati **gerarchicamente**.
+> 
 > E' un **protocollo** a livello di applicazione che permette la risoluzione dei nomi, e' un sistema fondamentale per il funzionamento di internet.
+> 
+> E' un servizio **best effort**: fa il meglio che può, ma la risposta puo' essere errata!
 
 DNS offre:
 * traduzione hostname
@@ -231,97 +239,120 @@ DNS offre:
 L'organizzazione gerarchica prevede:
 * un'insieme di server **root** 
 * dei server **Top Level Domain** (`.com; .it; .en; ecc...`)
-* dei server **Autoritativi**: esiste un server autoritativo per i siti di `amazon`, per `google`, ecc.... 
+* dei server **Autoritativi**: esiste un server autoritativo per i siti di `amazon`, per `google`. E' gestito dall'azienda stessa che detiene il sito, oppure da un service provider.
 
 > **Nota**: I DNS Autoritativi, *Sono propri di ciascuna organizzazione, e forniscono i mapping ufficiali da host-name a IP.*
 
 > I `root DNS` sono gestiti dal'`ICANN`.
 
-La richiesta DNS va al `DNS locale` (indicato di default)
+> [!note] `DNS` locale
+> E' indicato dall'ISP e viene contattato di default, non appartiene necessariamente alla gerarchia `DNS`.
+
+Le query `DNS` possono essere **iterative**: ogni server mi risponde dicendo chi devo contattare per risolvere l'hostname, finche' non ottengo come risposta l'indirizzo ip.
+
+Altrimenti possono essere **ricorsive**: ossia e' il server a cui richiedo di risolvere l'hostname a fare richiesta ad altri server per la risoluzione se non sa rispondermi.
+
+> **Nota**: i server possono fare `caching` per ritornare immediatamente il mapping. Ogni voce come al solito ha `TTL`
+
+Nel database `DNS` sono contenuti i record di risorsa: **RR** nella forma `(name, value, type, ttl)`, e si differenziano per `type`:
+* `A`: `name, value` sono rispettivamente `hostname, ip`
+* `NS`: `name, value` sono rispettivamente *dominio di appartenenza e server da contattare*
+* `CNAME`: in caso di **alias**.
+* `MX`: `value` e' il server di posta associato a `name`.
+
+Domande e risposte hanno lo stesso formato:
+![[Pasted image 20250906153648.png]]
+* `identificazione`: un id per associare domande e risposte.
+* `flag`: il messaggio e' domanda o risposta? voglio la ricorsione? sono un `DNS` autoritativo?
+* `sezione delle risposte`: contiene l'**RR**
+* `sezione autoritativa`: contiene record per i server autoritativi!
+
+Per aggiungere il mio sito al `DNS` devo, per esempio `diocane.com`:
+* aggiungere il record `(diocane.com, dns1.diocane.com, NS)` nel `TLD` per `.com`.
+* aggiungere il record `(dns1.diocane.com, 212.212.212.212, A)` 
+
+# architettura p2p
+In questo paradigma:
+* non c'e' un server sempre attivo.
+* sistemi periferici arbitrari che comunicano direttamente tra di loro.
+* i sistemi periferici cambiano continuamente ip.
+
+Nel paradigma client-server, per distribuire un file di $F$ bit da un server a $N$ peer:
+$$
+D_{c-s} \geq max \{NF/u_{s,}F/d_{min}\}
+$$
+ossia il massimo tra:
+* tempo che impiega il serve a fare l'upload verso $N$ client di $F$ bit con $u_s$ banda.
+* tempo massimo che impiega un client a scaricare $F$ bit.
+
+Invece in peer2peer, supponendo che $F$ sia inizialmente immagazzinato dentro un ipotetico server:
+$$
+D_{p2p} \geq max \{ \frac{F}{u_{s}}, \frac{F}{d_{min}}, NF/(u_{s} + \sum\limits u_i)\}
+$$ 
+ossia il massimo tra:
+* tempo di upload del server
+* tempo di download piu lento
+* il tempo che impiegano *i client come aggregato a inviare in rete*. Aumenta linearmente in $N$, ma all'aumentare di $N$ aumenta anche la capacita di upload
+
+Come funziona la trasmissione di file?
+* **tracker**: tiene traccia dei peer attivi che partecipano al `torrent`, ossia il gruppo di peer che condivide un file.
+* **chunk**: il file e' diviso in segmenti
+* **peer nuovo**: richiede al tracker una lista di peer a cui richiedere chunk. Mentre scarica, invia ad altri quelli che ha
+* **seeder**: peer che rimangono in rete per condividere il file.
+
+tattiche da usare nella condivisione:
+* **rarest first**: scarico prima i chunk piu rari in circolazione.
+* **ranking**: stilo una classifica dei migliori chunk con cui comunicare.
+* **tit-for-tat**: `A` tramite il suo ranking decide di mandare i chunk ai peer vicini che trasmettono alla velocità maggiore, ma allora gli altri peer sono **soffocati** da `A`! Dunque, bisogna fare in modo che ogni peer abbia la possibilità di salire nella classifica di altri nodi.
+# streaming 
+Nel contesto odierno, lo streaming di contenuti multimediali usa un botto di traffico: come faccio a soddisfare questa grande richiesta senza mandare tutto a fanculo?
+
+> [!note] Codifica dei frame efficiente.
+> Si può utilizzare la **ridondanza** che c'e' **tra un frame e l'altro** per mandare solo le parte di video che e' effettivamente cambiata, oppure la ridondanza puo' presentarsi nell'**immagine stessa** (più pixel vicini dello stesso colore).
+
+> **VBR**: Variable Bit Rate. Un formato video e' supporta VBR se puo' essere codificato riducendo la ridondanza.
+
+> **Nota**: in rete la larghezza di banda varia nel tempo (il fenomeno del **jitter**) e i pacchetti possono essere persi o ritrasmessi piu volte.
+
+E' necessario avere lato client:
+* un **buffer** per immagazzinare il video in arrivo, mentre riproduco altre porzioni del video.
+
+Lo streaming puo' essere:
+* `UDP`: *ossia invio pacchetti fino ad **egualiare** il bit rate del video*, ma la rete deve essere in grado di sostenere questo carico.
+* `HTTP`: *trasmetto alla massima velocita, eventualmente fino a **riempire** il buffer del client*, poi con il controllo del flusso diminuisco. Potendo inviare tanti dati se mediamente trasmetto tanto, posso compensare un jitter alto.
+* `DASH`: Dynamic Adaptive Streaming over **H**TTP.
+
+> [!note] DASH: manifest file
+> Ogni versione del video viene divisa in **blocchi**, ognuno di questi blocchi e' indirizzabile a partire dal `manifest file` del video, ossia un file `XML` che contiene gli url per raggiungere i vari blocchi.
+> 
+> Dunque il **client** puo' *richiedere i blocchi che gli servono e al bit-rate (versione) che puo' sostenere*.
+
+Come distribuisco questi contenuti? Come posiziono fisicamente i server?
+
+Installo `CDN` (Content Distribution Networks) geograficamente distribuite:
+* `enter deep`: installo vicino alle reti di accesso degli utenti
+* `bring home`: in prossimità degli `IPX`.
+
+> Una `CDN` e' un **cluster di server** e database che contengono tutte gli stessi media.
+
+# esercizi
+* `nc`: usato per aprire connessioni `TCP` e quindi posso scrivere manualmente una richiesta `HTTP`.
+* `curl`: e' un client `HTTP`, e mostra l'entità richiesta.
+
+Nelle richieste `HTTP`:
+* Devo sempre specificare `Host:` per un indirizzo `ip` ci potrebbero essere diversi server/siti web associati, ma identificati da un determinato `host`.
+* il server mi dice che `cookie` usare se non lo ho specificato nella richiesta con `Cookie:`
+* Il server specifica il cookie con `Set-Cookie:`
+* Nella prima riga specifico la risorsa! `GET /path/to/res HTTP/1.1`
+* usando `<<EOF`, ossia l'here document posso inviare piu richieste in **pipeline**
+* `curl -v` mostra dati aggiuntivi come gli header e indirizzi `ip`.
+* `curl -F "opt1=diocaro" -F "opt2=diobono www.diocane.org"` per mandare una `POST`
+* `curl -O fotoporno.jpg` per salvare il body in un file
+* `curl -v -b cookie.txt -c cookie.txt www.pornhub.com` per salvare e riutilizzare il cookie in `cookie.txt`
 
 
-## **DOMANDA 2 - DNS**
-
-Descrivi l'architettura gerarchica del DNS:
-
-- Quali sono i tre livelli principali di server DNS?
-- Spiega la differenza tra interrogazione iterativa e ricorsiva con un esempio
-- Perché il caching è importante e quali problemi può causare?
-- Elenca i 4 tipi principali di record DNS e il loro scopo
-
-Risposta
-Il DNS e' un protocollo dove le richieste vengono gestite in modo gerarchico: 
-* DNS Root Server: sono 13 diversi e replicati in giro per il mondo a centinaia
-* DNS Top Level Domain Server: DNS per dominio (es `.net`, `.edu`, `.org`), gestito da un'azienda.
-* DNS Server Autoritativo: ogni azienda ha un suo server DNS autoritativo oppure mi appoggio a un 3o che mi offre servizio DNS
-
-Quando faccio una richiesta di traduzione prima contatto un Root Server indicatomi dall'ISP: questo provvedera a dirmi quale DNS Top Level Domain devo contattare per risolvere l'indirizzo. Poi contatto il DNS Autoritativo fornito dal Top Level Domain, questo contiene una tabella dove sicuramente compare l'indirizzo che volevo tradurre.
-
-Questo sistema sebbene sembra contorto e' scalabile. Prima del DNS esisteva un unico file `HOSTS.txt` (come accade nel file unix `/etc/hosts`) dove sono conservate tutte le associazioni `server - IP`, ma questa soluzione non e' scalabile e non e' per niente comodo: oggi `HOSTS.txt` dovrebbe essere enorme, motivo per il quale e' stato abbandonato. 
-
-I root server sebbene replicati a centinaia formano un Single Point of Failure: se qualcuno decide di attaccare i DNS Radice, allora il servizio DNS va giu e non posso piu' connettermi ad internet, per questo deve essere protetto DNS!
-
-Le interrogazioni al server DNS possono essere fatte in modo ricorsivo o iterativo. Di solito quando faccio una richiesta DNS c'e' una cache che lavora al posto mio: controlla se ha in memoria un'associazione valida e me la fornisce, altrimenti effettua la traduzione dell'indirizzo per me contattando i DNS server giusti, ogni intermediario nella traduzione puo' scegliere se:
-* ritornare in modo iterativo il prossimo DNS da contattare o l'indirizzo IP (interrogazione iterativa)
-* contattare per conto mio il prossimo DNS, e fornirmi quindi 
-
-I DNS hanno tabelle che contengono 4 tipi di associazioni:
-* A: traduzione dominio -> IP
-* NS: dominio del dns da contattare per il dominio fornito
-* CNAME: alias dell'indirizzo IP
-* MX: alias per la posta elettronica
-
-Il caching e' utile ma tuttavia potrebbe ritornare associazioni obsolete, o mettersi di mezzo a servizi di traduzione DNS basati sull'utilizzo del servizio o sulla regione (es Reti per Streaming) Ma credo ci siano altri problemi che non ricordo 
-
-La struttura del messaggio DNS e' unica per risposta e richiesta e contiene tra i vari campi un ID per associare richiesta con risposta, si puo' specificare se desidero o no la ricorsione.
-## **DOMANDA 3 - P2P & BitTorrent**
-
-Analizza il sistema BitTorrent:
-
-- Qual è il vantaggio della distribuzione P2P rispetto al client-server in termini di scalabilità?
-- Spiega le strategie "rarest first" e "tit-for-tat"
-- Cosa significa "optimistically unchoked" e perché è utile?
-- Calcola: se un server ha banda 10u e ogni client ha banda u, quanto tempo serve per distribuire un file F a N=10 client nei due approcci?
-
-Nell'approccio client-server, con $s$ nodo server, $c$ nodo client, $\micro_{s}$ capacita di upload massima del server in rete, $d_{c}$ capacita del client in download, il tempo che impiegano $N$ client per scaricare un file di $L$ bits e' almeno: il tempo per trasmettere ad  $N$ cliente il file e il tempo piu lungo che impiega un client a scaricarlo.
-
-Invece con peer to peer. il tempo che impiaga la rete a trasmettere il file ad $N$ cliente e' almeno: il tempo minimo che impiega un nodo a caricare in rete, il tempo massimo che impiega un nodo per scaricare, il tempo che impiegano a trasmettere $N$ copie del file usando $K$ peer.
-
-Il fatto e' in peer to peer: all'aumentare dei peer, aumenta il numero di potenziali usufruitori del servizio ($N$), ma aumenta anche il numero di utenti disposti a cedere il servizio ($K$).
-
-In Bit Torrent in particolare un file di grandi dimensioni viene diviso in chunk di dimensione fissa. Per poter condividere il file deve esistere almeno un nodo che ha in memoria tutti i chunk. Quando un peer vuole scaricare i chunk vicini, richiede ad un server (`tracker`) una lista di peer online (piu' o meno vicini a me) e per ognuno di questi posso consultare una lista di chunk in loro possesso per poi richiedere a loro quelli che mi servono.
-
-Si possono adottare le seguenti strategie:
-* rarest first: scarico prima i chunk piu' rari, quelli che circolano di meno in rete cosi posso offrirli io agli altri!
-* tit for tat: meccanismo nel quale un nodo scambia chunk con altri nodi in base ad una raking list, basata su velocita e numero di chunk inviati da questo. Quello che puo' succedere e' che un gruppo di nodi potrebbe essere ognuno nella top dell'altro e lasciare gli altri nodi soffocati. Per questo motivo tipo ogni 30 secondi si sceglie di inviare chunk a caso ad altri nodi.
-* nel ranking dei nodi posso dare priorita ai nodi che condividono piu chunk per spronare gli utenti a condividere chunk invece di essere egosti e scaricare soltanto
-
-Non so che si intende per optimistically unchoked.
-Secondo il paradigma client server:
-* Il server deve inviare in rete 10 copie del file a tasso $10 u$, quindi: $10 F /10 u$ ossia $\frac{F}{u}$
-* I client hanno banda $u$ quindi impiegano: $\frac{F}{u}$ per ricevere.
-* In conclusione il tempo minimo per trasmettere e' $\frac{F}{u}$
-Nel paradigma peer to peer il tempo di trasmissione e' almeno :
-* $max\left\{ \frac{L}{\micro_{min}}, \frac{L}{d_{min}}, \frac{LN}{\text{upload totale}}  \right\}$ che in questo caso e' $\frac{L}{\micro_{min}}$
-
-
-## **DOMANDA 4 - STREAMING & CDN**
-
-Descrivi l'ecosistema dello streaming video:
-
-- Cos'è DASH e quali vantaggi offre?
-- Spiega le due strategie principali delle CDN: "enter deep" vs "bring home"
-- Come funziona il processo di accesso ai contenuti CDN (esempio Netflix)?
-- Perché serve il buffering e come si gestisce il jitter di rete?
-
-Lo streaming DASH permette di effettuare lo streaming di un file scaricandolo chunk per chunk. I chunk sono raccolti in un file `manifest` dove l'applicazione puo' scegliere i chunk in  base alla risoluzione sostenibile dalla rete (quindi e' adattabile). Puo' essere facilmente distribuito.
-
-Le CDN e' un insieme di database e server per lo streaming, posizionati nella rete in modo da alleggerire il carico del nucleo, e diminuire la latenza delle applicazioni. Ci sono due tattiche principali da adottare:
-* installare le CDN dentro alle reti di accesso `enter deep`
-* instalalre le CDN in prossimita delle reti di accesso `enter home`
-I server della CDN contengono gli stessi contenuti replicati piu e piu volte quindi bisogna scegliere quale server usare tra i tanti disponibili.
-Per guidare l'utente nel scegliere il giusto server si puo' sfruttare il DNS: il server autoritativo per il sito risponde forndendo l'indirizzo IP del server piu' vicino e che ha meno latenza all'host.
-
-Il buffering serve per raggirare il jitter: ossia la variazione del ritardo. Il jitter puo' essere piu' o meno alto, e questo vuol dire che non riesco a ricevere sempre on demand i dati per visualizzare l'istante di video per un determinato istante, quindi si preferisce fare il prefetch del video dentro un buffer.
-
-Quando il buffer si svuota richiedo altri dati, e visualizzo il video dal buffer. Questo mitiga l'effetto del jitter: se il buffer e' abbastanza grande e riesco a scaricare piu dati di quanti ne riproduco in tempo reale sto al top!
+Note generali su `DNS`:
+* `DNS Resolver`: dns locale dell'isp che risolve gli hostname
+* Ad un dns potrebbero essere associati piu `ip` per ovviare al fatto che uno potrebbe essere momentaneamente non disponibile (`down` o alto carico di traffico)
+* `GeoDNS`: risolvo l'indirizzo ip in base alla posizione geografica di chi fa richiesta
+* 

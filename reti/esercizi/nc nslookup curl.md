@@ -5,7 +5,7 @@
 nc -C art.uniroma2.it 80
 ```
 Dove:
-* `-C`: la sequenza `\n` e' convertita in `\r'n`
+* `-C`: la sequenza `\n` e' convertita in `\r\n`
 * `art.uniroma2.it 80` sono host name e porta well-known
 
 Nota, in `HTTP1.1`bisogna usare `Connection: close` per non usare connessione persistente.
@@ -40,6 +40,7 @@ E' stata omessa `-N` che permette di chiudere le estremità della connessione in
 > *E' il client che chiede di chiudere la connessione al server!*
 
 ## nslookup: virtual hosting
+`nslookup` permette di interpellare il sistema `DNS`.
 
 ```bash
 nslookup art.uniroma2.it

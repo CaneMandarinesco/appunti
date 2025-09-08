@@ -1,51 +1,52 @@
-Mentre il livello di applicazione definisce un protocollo per definire come comunicano due end point, il livello di trasporto offre un servizio di connessione logica tra due socket tramite:
+Mentre il livello di applicazione definisce un protocollo per definire come comunicano due end point, il livello di trasporto offre un **servizio di connessione logica** **tra due socket** tramite:
 * multiplexing/demultiplexing dei pacchetti
 * checksum
-* affidabilita: si o no
-* arrivo in ordine: si o no
-* controllo flusso. 
-* controllo congestione router.
+* affidabilità
+* arrivo in ordine dei pacchetti
+* controllo del flusso
+* controllo della congestione router
 
 Ci sono due principali protocolli ti trasporto:
-* `UDP`: protocollo senza fronzoli, fa la checksum del pacchetto ma non garantisce nulla sull'affidabilita, e sull'arrivo in ordine.
-* `TCP`: protocollo "sicuro", garantisce l'arrivo a destinazione dei messaggi e che arrivino in ordine fornendo l'astrazione di un canale di comunicazione "sicuro".
+* `UDP`: *protocollo senza fronzoli*, fa la checksum del pacchetto ma non garantisce nulla sull'affidabilità, e sull'arrivo in ordine.
+* `TCP`: *protocollo "sicuro"*, garantisce l'arrivo a destinazione dei messaggi e che arrivino in ordine fornendo l'astrazione di un canale di comunicazione "sicuro". *Richiede una **connessione** prima di iniziare a scambiare messaggi*.
 
-Ma perche' TCP deve gestire tutte queste cose? Perche' sotto il layer di trasporto c'e' il protocollo di inoltro basato sui datagrammi  IP, dove l'inoltro e':
-* best effort: se un router e' congestionato, o ha un buffer pieno allora il pacchetto viene perso
-* dipende dalla ToS indicato nel pacchetto
-* a causa di vari errori potrebbe non essere possibile inoltrare il pacchetto a destinazione.
-* non c'e' un servizio di multiplexing!
-Inoltro in IP, ad ogni host e' associato un indirizzo IP gerarchico, unico in rete: grazie a questa informazione possiamo spedire i pacchetti in rete.
-La maggior parte di questi errori vengono notificati dal protocollo ICMP.
+> `TCP` e' piu robusto perche' il protocollo `ip` sottostante e' di tipo `best effort`, ossia non garantisce l'arrivo dei pacchetti a destinazione, e inoltre non offre multiplexing dei pacchetti.
 
 # multiplexing e demultiplexing
-Abbiamo detto che l'interfaccia base che permette ad un'applicazione di dialogare su internet: la socket, ma possono esistere piu' socket contemporaneamente su un sistema, quindi quando IP inoltra a destinazione un paccetto bisogna effettuare il demultiplexing verso la giusta porta.
+Su un `host` possono esistere piu' socket contemporaneamente, dunque bisogna effettuare il demultiplexing, verso la giusta porta, ossia la giusta socket.
 
-Il multiplexing e' l'azione con il quale un protocollo di trasporto prende dalle varie socket i messaggi da spedire e li incapsula in segmenti.
-Il demultiplexing e' l'azione con il quale i segmenti in arrivo sono demultiplexati verso le porte giuste analizzando i campi che riguardano le porte.
-Il trasporto end-to-end e' implementato da IP! Quindi eventualmente TCP prima di fornire alla socket i messaggi fara dei controlli per vedere se: sono in ordine, dei messaggi non sono arrivati a destinazione.
+> `multiplexing`: azione con cui un protocollo di trasporto prende i messaggi dalle socket e li incapsula in segmenti
+
+> `demultiplexing`: azione con cui i segmenti una volta a destinazione vengono consegnati alla giusta socket
+
+> `tcp` prima di effettuare il demultiplexing si occupera' di controllare se i pacchetti sono arrivati correttamente e di consegnarli in ordine. 
 
 Ma come faccio a conoscere la porta di destinazione a priori? Semplice: a seconda del tipo di software con cui devo dialogare e' standardizzato (Es: `SSH` su porta 22, `HTTP` su porta 80, ecc...).
-### UDP vs TCP
-In TCP la socket a cui recapitare il messaggio e' scelta analizzando i campi: `(src port, dest port)`. Ossia ogni client ha una sua socket dedicata sul server secondo il protocollo TCP.
-Mentre in UDP il demultiplexing e' effettuato guardando solo la `dest port`: piu client inviano messaggi alla stessa porta del server.
+
+> [!note] demult UDP/TCP
+> * `TCP`: in base a  `(source port, dest port)`
+> * `UDP`: in base a `dest port`
 
 ## perche' UDP?
-UDP e' un protocollo che da la possibilita di implementare i meccanismi di TCP lato utente, insieme ad altri controlli di sicurezza.
-TCP potrebbe essere svantaggioso a causa dell'overhead: gestire il trasporto senza perdita verso la destinazione richiede l'invio di byte aggiuntivi e ritrasmissioni inutili, svantaggioso per il real time e lo streaming.
+> `UDP` e' un protocollo che da la possibilita di implementare i meccanismi di TCP lato utente, insieme ad altri controlli di sicurezza.
+
+> `TCP`: potrebbe essere svantaggioso a causa dell'overhead. effettua molti controlli e aggiunge moltoo byte in overhead. Ci sono eventuali ritrasmissioni inutili.
+> Non va bene per real time e streaming in genere.
 
 Ci sono infatti applicazioni che tollerano la perdita di messaggi e l'arrivo fuori ordine, o che tollerano anche una rete congestionata.
 
-Lo streaming UDP e' tuttavia sconsigliato: richiede molta banda e non si regola! Congestiona la rete.
+> *Lo streaming UDP e' tuttavia sconsigliato*: richiede molta banda e non si regola! Congestiona la rete.
 
+> [!note] socket passiva
+> Un `host` ha una socket passiva per accettare le richieste di connessione `tcp`.
 # UDP
 La struttura di un segmento  UDP e' semplice:
-* numero porta di origine: altrimenti il server non sa chi ha inviato il messaggio
-* numero porta di destinazione: per effettuare il forward dei paccheti
+* **numero porta di origine**: altrimenti il server non sa chi ha inviato il messaggio
+* **numero porta di destinazione**: per effettuare il forward dei paccheti
 * lunghezza
 * checksum
 ## Checksum
-La checksum e' un campo che permette di identificare con una certa accuratezza se ci sono stati cambiamenti nei bit durante la trasmissione del pacchetto.
+La checksum e' un campo che permette di identificare con una certa accuratezza se sono avvenuti errori di trasmissione.
 
 Per usare la checksum bisogna vedere il pacchetto come una sequenza di interi a 16 bit rappresentati in complemento a 1. Ogni sequenza viene sommata: inclusa la checksum, se il risultato e' $(1...1)$ ossia 0, allora il pacchetto e' stato ricevuto correttamente
 
@@ -63,13 +64,15 @@ Per costruire la trasmissione affidabile useremo una macchina a stati finiti che
 Vogliamo creare l'astrazione di un canale di comunicazione affidabile, anche se le primitve `udt` implementano un canale di comunicazione inaffidabile (livello di rete) per consegnare in modo affidabile i dati al livello di applicazione 
 
 ### rdt 1.0
-In questo protocollo is assume che: il canale di trasmissione non perda pacchetti,
-* Mittente: un'unico stato dove si attende la chiamata della primitiva dall'alto, si crea il segmento TCP e si invia al destinatario
-* Ricevente: un'unico stato dove si attende la chiamata dal basso, e si inviano i dati all'alto.
+In questo protocollo is assume che: il canale di trasmissione non perda pacchetti.
+* **Mittente**: un'unico stato dove si attende la chiamata della primitiva dall'alto, si crea il segmento TCP e si invia al destinatario
+* **Ricevente**: un'unico stato dove si attende la chiamata dal basso, e si inviano i dati all'alto.
 Non c'e' bisogno di controllare la checksum perche' 
 
 ### rdt 2.0
-Si assume che il canale sottostante possa trasmettere pacchetti errati, per essere sicuri che il ricevente abbia ricevuto il pacchetto e che non sia corrotto attendo la ricezione di un messaggio `ACK` o `NAK` (si ho capito, no non ho capito).
+> Si assume che il canale sottostante possa trasmettere pacchetti errati
+
+per essere sicuri che il ricevente abbia ricevuto il pacchetto e che non sia corrotto attendo la ricezione di un messaggio `ACK` o `NAK` (si ho capito, no non ho capito).
 ##### mittente
 * `stato 0`: attendo la chiamata dall'alto, creo il segmento tcp, lo invio e vado in `stato 1`
 * `stato 1`:  attendo la chiamata dal basso, attendo `ACK` o `NAK` dal mittente, se ho un `ACK` valido torno in `stato 0`, se ho `NAK` rimango in `1` e reinvio il pacchetto che ancora devo riscontrare
