@@ -9,13 +9,6 @@
 - *"Il nucleo non interessa il tipo di pacchetto"* → **Falso**, i router possono usare **DSCP** (field ToS in IP) per QoS.  
 - *"Creare un protocollo personalizzato"* → Possibile, ma deve rispettare standard di interoperabilità (es. porte registrate IANA).  
 
-🔹 **Aggiungi**:  
-- **Cookie**: File memorizzati lato client per tracciare sessioni (es. login). Usati per:  
-  - Autenticazione (es. session ID).  
-  - Personalizzazione (preferenze utente).  
-  - Tracking (pubblicità).  
-  - **Problemi**: Privacy, sicurezza (Cookie hijacking).  
-
 #### **2. HTTP**  
 ✅ **Corretto**:  
 - Protocollo stateless, richieste/respose ASCII, metodi (GET, POST, ecc.).  

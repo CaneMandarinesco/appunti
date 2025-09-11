@@ -107,6 +107,8 @@ Nell'intestazione troviamo alcuni campi come:
 * `Accept-Encoding`: che encoding...
 * `Connection`: voglio chiuderla o lasciarla aperta?
 
+> Nota: `HTTP/1.1+` usa connessioni persistenti
+
 ### risposta http
 La risposta http e' fatta tipo cosi:
 ```http
@@ -149,14 +151,20 @@ Si usano per mantenere uno storico delle transazioni usando:
 * *cookie mantenuto sistema dell'utente*
 * **database** sul sito
 
+> [!note] `set-cookie`
 Quando viene fatta una richiesta `HTTP`, se non e' fornito un cookie, il server genera un identificativo per te specificando nella risposta per esempio `set-cookie: 1678`. 
+> Con `cookie` il client indica il suo id.
 
 L'utente ricorda il suo cookie per quel sito e il server associa a quell'cookie u*n'identità digitale e crea una voce per te nel suo database*.
 
-I cookie sono usati per:
-* gestire autorizzazioni
-* ricordare il carrello degli acquisti
-* **ricordare preferenze utente**
+I cookie non sono altro che **File memorizzati lato client** per:  
+  - Autenticare l'utente (es. session ID).  
+  - Personalizzare la navigazione (preferenze utente).  
+  - Tracking (pubblicità).  
+  - **Ma con problemi di**: Privacy e sicurezza (Cookie hijacking).
+
+> [!warning] File Cookie
+> Il cookie viene salvato in ram, oppure nel file system come un semplice file. L'informazione del cookie lato utente riguarda l'**id piu altri metadati**, *esclusi i dati di personalizzazione o di tracking* che usa il server, quelli li tiene in memoria lui nel suo database!
 
 Es: un sito web di annunci `A`, ti fornisce il cookie da usare per lui. Lo stesso sito web e' inglobato in altre pagine, quindi `A` viene caricato nella tua pagina inconsapevolmente, ed `A` sa chi sei, e quali pagine hai visitato!
 
@@ -168,7 +176,7 @@ ecc...
 ```
 Dove `1678` e' il tuo cookie!
 
-Questo e' un **cookie di terze parti**: ossia ti traccia su piu siti!
+> Questo e' un **cookie di terze parti**: ossia ti traccia su piu siti!
 
 ## Web Cache
 * e' **locale**
@@ -179,6 +187,8 @@ Questo e' un **cookie di terze parti**: ossia ti traccia su piu siti!
 Perché' introdurre una cache?
 * ridurre tempi di **risposta**, dato che la cache e' vicina al client.
 * **scenario**: tra i client e il server c'e' un collegamento che fa da **bottleneck**.
+
+> **Nota**: con le opzioni `If-Modified-Since` ed `ETag` evito di riscaricare la risorsa! `get-condizionale`.
 # `E-mail`: `SMPT`
 Ci sono tre figure principali:
 * **user agent**: scrive, e legge i messaggi, che sono memorizzati su un server.
@@ -198,6 +208,11 @@ Un'interazione `SMTP` e' tipo cosi:
 * `Server`: `250 Hello crepes.fr, pleased to meet you`. Qui si conclude l'**handshaking** `SMPT`.
 * `Client`: `MAIL FROM <...>`
 * e cosi via, fino alla chiusura della connessione
+
+> **Nota**: i comandi piu usati sono `HELO`, `MAIL FROM`, `RCPT TO` e `DATA`.
+
+> [!note] `dot-stuffing`
+> Sequenza di `..`, usata per evitare che un singolo `.` a inizio riga sia interpretato come fine del corpo della mail.
 
 ![[Pasted image 20250906152153.png]]
 
@@ -260,6 +275,24 @@ Nel database `DNS` sono contenuti i record di risorsa: **RR** nella forma `(name
 * `CNAME`: in caso di **alias**.
 * `MX`: `value` e' il server di posta associato a `name`.
 
+Con `nslookup` e `dig` posso interrogare i server dns da riga di comando.
+
+> La sezione `authority` contiene i record `NS` che indicano i server autoritativi relativi alla risposta. Per contattarli poi devo guardare nella sezione `additional` che contiene i record `A/AAAA`.
+
+> Quando interrogo un **root server** con `nslookup -norecurse -nosearch -debug -type=A we.uniroma2.it` non ottengo direttamente l'IP in quanto non sono autoritativi per `web.uniroma2.it` e ottengo i referral per `.it`.
+
+> Se la risposta e' autoritativa per il server contattato allora `AA=1` (Authoritative Answer)
+
+> Se il dominio non esiste ottengo `NXDOMAIN`
+
+> Nota: il google dns e' un resolver ricorsivo pubblico. Risponde solo con ricorsione dunque o se ha la risposta in cache, dunque se mando una richiesta senza ricorsione ottengo solo il risultato dalla cache.
+
+> Il valore di preference nei record ha preferenza dal piu basso al piu alto.
+
+> `resolv.conf` indica i nameserver da contattare
+
+> `dig +trace` fa tutte le richieste iterative per risolvere il nome/.   
+
 Domande e risposte hanno lo stesso formato:
 ![[Pasted image 20250906153648.png]]
 * `identificazione`: un id per associare domande e risposte.
@@ -305,17 +338,14 @@ tattiche da usare nella condivisione:
 * **ranking**: stilo una classifica dei migliori chunk con cui comunicare.
 * **tit-for-tat**: `A` tramite il suo ranking decide di mandare i chunk ai peer vicini che trasmettono alla velocità maggiore, ma allora gli altri peer sono **soffocati** da `A`! Dunque, bisogna fare in modo che ogni peer abbia la possibilità di salire nella classifica di altri nodi.
 # streaming 
-Nel contesto odierno, lo streaming di contenuti multimediali usa un botto di traffico: come faccio a soddisfare questa grande richiesta senza mandare tutto a fanculo?
+ Nel contesto odierno, lo streaming di contenuti multimediali usa un botto di traffico: come faccio a soddisfare questa grande richiesta senza mandare tutto a fanculo?
 
 > [!note] Codifica dei frame efficiente.
 > Si può utilizzare la **ridondanza** che c'e' **tra un frame e l'altro** per mandare solo le parte di video che e' effettivamente cambiata, oppure la ridondanza puo' presentarsi nell'**immagine stessa** (più pixel vicini dello stesso colore).
 
 > **VBR**: Variable Bit Rate. Un formato video e' supporta VBR se puo' essere codificato riducendo la ridondanza.
 
-> **Nota**: in rete la larghezza di banda varia nel tempo (il fenomeno del **jitter**) e i pacchetti possono essere persi o ritrasmessi piu volte.
-
-E' necessario avere lato client:
-* un **buffer** per immagazzinare il video in arrivo, mentre riproduco altre porzioni del video.
+> **Jitter**: in rete la larghezza di banda varia nel tempo e i pacchetti possono essere persi o ritrasmessi piu volte. Si controlla utilizzando un **buffer** lato utente.
 
 Lo streaming puo' essere:
 * `UDP`: *ossia invio pacchetti fino ad **egualiare** il bit rate del video*, ma la rete deve essere in grado di sostenere questo carico.
@@ -355,4 +385,3 @@ Note generali su `DNS`:
 * `DNS Resolver`: dns locale dell'isp che risolve gli hostname
 * Ad un dns potrebbero essere associati piu `ip` per ovviare al fatto che uno potrebbe essere momentaneamente non disponibile (`down` o alto carico di traffico)
 * `GeoDNS`: risolvo l'indirizzo ip in base alla posizione geografica di chi fa richiesta
-* 

@@ -1,42 +1,67 @@
-Il Layer di Rete si occupa di calcolare e di effettuare l'inoltro dei pacchetti ricevuti dal livello di trasporto, fino a destinazione.
-Il Layer opera sul piano dei dati: inoltro del pacchetto nel router attraverso l'uscita corretta e piano di controllo: calcolo delle tabelle di inoltro di ogni router.
-La qualita del servizio di IP e' limitata, ma sul lungo termine IP e' il protocollo piu usato, anche se altri promettevano una QoS migliore.
+> l Layer di Rete si occupa di **calcolare** e di **effettuare** l'inoltro dei pacchetti ricevuti dal livello di trasporto, fino a destinazione.
 
-Questi due piani vengono implementati oggi grazie alla SDN: Software Defined Network, un'approccio dove il piano di controllo viene attuato da un'unico controllore, che installa le tabelle di inoltro calcolate nei router della rete.
-Si tratta di un'approccio centralizzato, semplice da implementare.
+> **Piano dei dati**: inoltro del pacchetto nel router attraverso l'uscita corretta
+> **Piano di controllo**: calcolo delle tabelle di inoltro di ogni router.
 
-Uno degli attori principali del layer di rete e' il router, questo e' costituito da:
-* porte in ingresso
-* porte in uscita
-* struttura di commutazione che collega in modo arbitrario input con output, lavora nell'ordine dei nanosecondi, attua il piano dei dati
-* processore, lavora nell'ordine dei millisecondi, attua il piano di controllo
+La qualità del servizio di IP e' limitata, ma funziona meglio per l'infrastruttura che oggi ha internet.
+
+> [!note] SDN
+> La Software Defined Network e' un'approccio dove il piano di controllo viene attuato da un'unico **controllore**, che installa le tabelle di inoltro calcolate nei router della rete.
+> **Centralizzato, e semplice da implementare.**
+
+> [!note] Ruter
+>  * porte in ingresso 
+>  * porte in uscita
+>  * **struttura di commutazione**, lavora nell'ordine dei *nanosecondi*, attua il piano dei dati
+>  * **processore**, lavora nell'ordine dei millisecondi, attua il piano di controllo
 
 Le porte in ingresso invece sono costituite da: 
-* terminale in ingresso: livello fisico
-* struttura di eleborazione del segnale: livello di collegamento
-* **buffer**: su cui posso cercare i pacchetti in arrivo
+* **terminale in ingresso**: livello fisico
+* **struttura di eleborazione** del segnale: livello di collegamento
+* **buffer**: su cui posso leggere i pacchetti in arrivo
 
-Ora come faccio ad inoltrare i pacchetti?
-* inoltro generalizzato: grazie a strumenti come OpenFlow posso scegliere dove reindirizzare un pacchetto in base a una serie di controlli sui campi del pacchetto
-* inoltro su destinazione: decido dove inoltrare guardando solo ip destinazione del pacchetto IP
+Ora come faccio ad **inoltrare** i pacchetti?
+* **inoltro generalizzato**: OpenFlow, stanard con cui inoltro i pacchetti usando l'approccio match+action.
+* inoltro su **destinazione**: guardo solo l'IP di destinazione.
 
 Comunque sia prima di inoltrare un pacchetto lo devo analizzare! E lo devo fare velocemente per evitare code sui buffer di entrata! Oppure se sono troppo veloce, o ho troppi pacchetti in input potrei riempire i buffer in uscita Head Of Line blocking,.
 
-L'inoltro su destinazione e' implementato grazie alle TCAM: memorie che possono immagazzinare blocchi di indirizzi (rappresentati con notazione CIDR) associati ad una porta di uscita. La TCAM e' interpellabile in parallelo per ottenere in breve tempo la corrispondenza migliore grazie ad un priority encoder e ad un decoder del segnale (accendo la porta decodificata).
+> [!note] TCAM
+> Immagazzinano **blocchi indirizzi** (espressi con notazione **CIDR**) e li associano ad una porta di uscita.
+> Interpellabile in **parallelo**: ottengo una risposta in breve tramite un **priority encoder** e un **decoder del segnale**.
+
+> **Nota**: la commutazione avviene usando il prefisso piu' lungo.
 
 La commutazione dei pacchetti avviene in 3 modi:
-* memoria: input copiato in memoria e poi riprelevato
-* bus: un bus comune su cui e' possibile scrivere e leggere
-* rete di commutatori: le porte di input e output sono collegate mediante una rete di commutatori, in modo da favori comunicazione parallela. Talvolta si usano in paralello piu reti di commutatori.
+* **memoria**: input copiato in memoria e poi riprelevato
+* **bus**: un bus comune su cui e' possibile scrivere e leggere
+* **rete di commutatori**: le porte di input e output sono collegate mediante una rete di commutatori, in modo da favori comunicazione parallela. Talvolta si usano in parallelo più reti di commutatori. Posso frammentare il pacchetto in modo da farlo andare teoricamente piu veloce!
 
-Nel router avvengono frequentemente i seguenti problemi:
-* Head of Line Blocking: il buffer in uscita e' pieno
+> [!note] Tasso di trasferimento
+> velocità con il quale i pacchetti passano dalla porta di input alla porta di output.
 
-Bisogna scegliere una Drop Policy, es: Tail Drop, oppure RED per scegliere come scartare i pacchetti in ingresso. Tail Drop scarta quello appena arrivato, invece RED usa un'approccio probaiblistico per scartare oppure marcare un pacchetto per segnalare la congestione 
+> [!warning] HOL
+> Head Of The Line blocking: quando un pacchetto in testa alla coda del buffer non viene trasferito sulla porta in uscita, bloccando gli altri!
 
-Bisogna scegliere una Scheduling Policy, per esempio round robin a classi, pero' devo essere in grado di assegnare classi di priorita a i pacchetti nella coda. Oppure ancora meglio WFQ, ossia utilizzo classi per determinare il peso di ogni pacchetto, e schedulo dando priorita alla classe piu pesante rispetto alle altre: per questo e' fair, perche' uso pesi diversi ma guardo essenzialmente la classe che pesa di piu.
+> **Nota**: Bisogna scegliere una **Drop Policy** ed una **Scheduling Policy**.
 
-Nota: anche se introduciamo le classi, la rete dovrebbe restare neutrale, e' uno dei capi saldi delle reti.
+> **Nota**: buffer troppo grandi aumentano l'RTT e dunque TCP diventa **meno reattivo** sul rilevamento della congestione.
+
+> [!note] Marcatura
+> Posso marcare i bit con `ECN` o `RED`.
+### schedulazione
+* **FCFS**: trasmetto in ordine di arrivo
+* **Priority**: traffico in arrivo accodato per classi e applico FCFS sulle classi. Puo' indurre a **starvation**.
+* **Round Robin**: come priority ma ciclo tra le classi per evitare starvation.
+* **Weighted Fair Queuing**: ripartisco ai pacchetti una frazione di banda in base al loro peso.
+
+> **RED**: sceglie in modo probabilistico se marcare o droppare i pacchetti in ingresso.
+
+> Tail Drop: scarto i pacchetti appena arrivati.
+
+> **Nota**: i router non implementano `TCP` o `UDP`, ma possono marcare alcuni campi di `TCP` per la congestione.
+
+> **Nota**: anche se introduciamo le classi, *la rete dovrebbe restare neutrale*, e' uno dei capi saldi delle reti.
 
 Un datagramma IP e' costituito dai seguenti campi:
 * ToS: 2 byte descrivono la priorita del pacchetto e il tipo
