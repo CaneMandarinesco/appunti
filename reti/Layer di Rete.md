@@ -3,7 +3,7 @@
 > **Piano dei dati**: inoltro del pacchetto nel router attraverso l'uscita corretta
 > **Piano di controllo**: calcolo delle tabelle di inoltro di ogni router.
 
-La qualità del servizio di IP e' limitata, ma funziona meglio per l'infrastruttura che oggi ha internet.
+La qualità del servizio di IP e' limitata, ma funziona bene per l'infrastruttura che oggi ha internet.
 
 > [!note] SDN
 > La Software Defined Network e' un'approccio dove il piano di controllo viene attuato da un'unico **controllore**, che installa le tabelle di inoltro calcolate nei router della rete.
@@ -55,7 +55,7 @@ La commutazione dei pacchetti avviene in 3 modi:
 * **Round Robin**: come priority ma ciclo tra le classi per evitare starvation.
 * **Weighted Fair Queuing**: ripartisco ai pacchetti una frazione di banda in base al loro peso.
 
-> **RED**: sceglie in modo probabilistico se marcare o droppare i pacchetti in ingresso.
+> **RED**: sceglie in modo probabilistico se **marcare o droppare** i pacchetti in ingresso.
 
 > Tail Drop: scarto i pacchetti appena arrivati.
 
@@ -63,162 +63,310 @@ La commutazione dei pacchetti avviene in 3 modi:
 
 > **Nota**: anche se introduciamo le classi, *la rete dovrebbe restare neutrale*, e' uno dei capi saldi delle reti.
 
-Un datagramma IP e' costituito dai seguenti campi:
-* ToS: 2 byte descrivono la priorita del pacchetto e il tipo
-* Lunghezza dell'intero datagramma
-* Checksum solo dell'intestazione
-* Bit DF, Offset, e ID: servono per la frammentazione del pacchetto
-* ip sorgente
-* ip destinazione
-* sequenza variabile di byte
-* Dati!
+Formato **datagramma ip**:
+![[Pasted image 20250911214010.png]]
+le parti piu importanti sono:
+* **lunghezza intestazione** e **ToS**: ip puo' fare delle
+* **lunghezza del datagramma**
+* id
+* **flag** e **offset** del frammento per la ricomposizione.
+* TTL e livello superiore
+* checksum
+* ip sorgente e destinazione
+* opzioni variabili
+* dati: ossia il segmento tcp o il datagramma udp.
 
-MTU: esiste un limite alla grandezza di un datagramma che puo' essere trasmesso in un collegamento, di solito e' tipo `1500`.
+> **Nota**: l'overhead e' di 40 byte. Quindi se `MTU=1500`, di questi, `40` sono overhead.
 
-Se saturo MTU IP permette di frammentare i dati all'intero del pacchetto per portarlo a destinazione. Nota che dei 1500 byte standard 40 (o piu) sono usati solo dall'header TCP+IP. 
+> [!note] MTU
+> Limite della grandezza del datagramma che puoi trasmettere.
 
-Per decompore e ricomporre il pacchetto sono usati l'ID dei pacchetti e l'offset. Se DF e' acceso allora la frammentazione non e' possibile e ricevo un messaggio ICMP dal router.
+> Se il bit `DF` e' acceso, allora niente deframmentazione e ottengo un messaggio ICMP di errore.
 
-IPV6 non permette la frammentazione del pacchetto: devo trovare la MTU del collegamento a destinazione, per farlo uso un valore probabile per MTU e se ricevo messaggio di errore allora lo devo abbassare.
+> **Nota**: `IPv6` deframmentazione deprecata. Devo fare **Path MTU Discovery**.
 
 ## Indirizzamento IP
-Viene fatto usando la notazione CIDR. Internet e' una rete di rete e gli indirizzi IP sono gerarchici in quanto interfacce di rete nella stessa rete hanno la stessa sottorete. La parte di sottorete di un indirizzo ip e' scritta cosi secondo notazione CIDR: `40.2.10.80/20`: vuol dire che i primi 20 bit dei 32 costituiscono la sottorete e tutte le interfacce hanno gli stessi primi 20 bit in comune.
-
+L'indirizzamento `IP`:
+* segue la notazione `CIDR`, ossia `x.x.x.x/nn`
+* E' **gerarchico**: dispositivi nella stessa rete hanno una stessa parte dell'indirizzo, detta maschera **di sottorete**.
+> [!note] suddivisione fissa in classi
+> 
 Prima di CIDR si usava una suddivisione in classi fissa degli IP:
-* A: inizia con `01` e la maschera di rete e' di 8 bit
-* B: inizia con `011` e la maschara di rete e' di 16 bit
-* C: inizia con `0111` e la maschera di rete e' di 24 bit
-* D per multicast mentre E riservato
+> * A: inizia con `01` e la maschera di rete e' di 8 bit
+> * B: inizia con `011` e la maschara di rete e' di 16 bit
+> * C: inizia con `0111` e la maschera di rete e' di 24 bit
+> * D per **multicast** mentre E **riservato**
 
-### Dhcp
-Ma come ottengo un indirizzo ip valido, unico nella sottorete? Semplice, lo chiedo mannaggia la puttana! 
+### Dynamic Host Configuration Protocol
+Ma come ottengo un indirizzo ip valido, unico nella sottorete? *Semplice, lo chiedo mannaggia la puttana*! Con **DHCP**. 
 
 1. mi collego in rete, ma non ho un indirizzo
-2. mando una richiesta dhcp: `dhcp discover` in broadcast a tutti, con un ID personale
-3. un server `dhcp` mi rispondera con una `dhcp offer` associata al mio ID
+2. mando una **richiesta dhcp**: `dhcp discover` in broadcast a tutti, con un **ID personale**
+3. un server `dhcp` mi risponde con una `dhcp offer` associata al mio ID
 4. mando una `dhcp request` al server con l'IP che mi ha mandato
 5. se ricevo un `ack` allora posso usare questo IP per identificarmi nella sottorete
 
-dhcp puo' fornire varie informazioni: server DNS, maschera di sottorete, router gateway ecc....
+> **Nota**: `DHCP` usa un **ID**.
+
+> **Nota**: `DHCP` usa **UDP**. (banale) 
+
+> [!note] dhcp
+> `dhcp discover` $\to$ `dhcp offer` $\to$ `dhcp request` $\to$ `dhcp ack`. **I primi due opzionali**! 
+
+> **Nota**: dhcp puo' fornire varie informazioni: server DNS, maschera di sottorete, router gateway ecc....
 
 La notazione CIDR, oltre che per identificare le sottoreti viene utilizzata per far sapere agli utenti della rete (o meglio al nucleo) dove dovrebbero passare i pacchetti verso un certo indirizzo.
-Ogni ISP e' in grado con i suoi router di pubblicizzare un range di indirizzi espresso in notazione CIDR, le altre reti in ascolto possono scegliere se inoltrare o no i pacchetti per quel range di indirizzi verso l'ISP, e l'informazione di conseguenza si propaga in rete.
+
+> **Nota**: Ogni ISP e' in grado con i suoi router di **pubblicizzare un range di indirizzi** espresso in notazione CIDR, le altre reti in ascolto possono scegliere se inoltrare o no i pacchetti per quel range di indirizzi verso l'ISP, e l'informazione di conseguenza si propaga in rete.
+
+> Ogni sottorete ottiene l'indirizzo `ip` dall'ISP, e quest'ultimo dall'`ICANN`.
+
+> [!warning] indirizzi riservati nella sottorete
+> Nella sottorete l'indirizzo con parte di host 0 e quello con tutti 1 sono riservati a non so cosa e al **broadcast**.
 # Non sono pochi 32-bit?
 Si, ed e' per questo che viene adottato un controsenso nella pila di protocolli.
 
-Oltre ad avere DHCP, algoritmi per scartare pacchetti, frammentazione, e altre cose c'e' NAT: un meccanismo che permette agli host di una rete di avere ognuno un'indirizzo distinto nella sottorete, me un'unico indirizzi pubblico all'esterno.
+> [!note] NAT: il controsenso.
+Oltre ad avere DHCP, algoritmi per scartare pacchetti, frammentazione, e altre cose c'e' **NAT**: *un meccanismo che permette agli host di una rete di avere ognuno un'indirizzo distinto nella sottorete*, ma un'unico indirizzo pubblico all'esterno.
 
-NAT si implementa semplicemente tramite una tabella di traduzione installata nel router gateway: ogni richiesta in arrivo dall'esterno deve sostituire ip di destinazione con l'ip della sottorete mentre per ogni richiesta in uscita deve sostituire ip sorgente con quello pubblico.
+NAT si implementa semplicemente tramite una **tabella di traduzione** installata nel **router gateway**.
 
-Si mantiene quindi in memoria questa tabella a cui attingere per la traduzione: ad ogni coppia di IP, Porta corrisponde una coppia IP, Porta per l'esterno essenzialmente ad ogni Porta del router di gateway corrisponde una socket in un host.
+> **Nota**: ogni richiesta in arrivo dall'esterno deve sostituire ip di destinazione con l'ip della sottorete mentre per ogni richiesta in uscita deve sostituire ip sorgente con quello pubblico.
+
+> **Nota**: ad ogni porta sul router corrisponde una socket su un qualche host.
 
 # IPv6 e tunneling
-E' composto da:
-* sorgente: 16 bit
-* destinazione: 16 bit
-* identificatore di flusso
-* limite di hop
-* bit per QoS
+![[Pasted image 20250911232907.png]]
+I campi piu' importanti sono:
+* **classe di traffico**
+* etichetta di flusso
+* **limite di hop**
 
-ipv6 non permette la frammentazione del pacchetto, ma soprattutto... se devo passare per un router IPV4, che non supporta IPV6 come faccio? 
+> **Nota**: manca la checksum, la deframmentazione e le opzioni.
 
-Si usa il tunneling: quando effettuo l'instrandamento mi accorgo che dovro passare innanzitutto per un router a doppia teconlogia $A$, che sia in grado di prendere il datagramma ipv6 e di ficcarlo come payload di un datagramma ipv4 con ip destinazione il prossimo router a doppia tecnologia $B$ che mi permette di portare il pacchetto a destinazione $C$. Quando $B$ riceve il pacchetto (non e' detto dopo un solo `hop`) riprende il datagramma ipv6 e sa che lo deve spedire a $C$ (e' scritto nell'intestazione da $A$).
+> **Nota**: la notazione corta per `IPv6` e' `ffff:ffff::ffff`.
 
-La notazione per i pachetti ipv6 e' 8 sequenze di 4 caratteri esadecimali separate da `:`. la notazione `x:x::x` indica che tra la seconda coppia e l'ulitma di caratteri ci sono degli zeri. 
+> [!note] tunneling
+> Si usa quando da `IPv6` devo passare per un router `IPv4` tramite due router a doppia tecnologia.
+> Il pacchetto `IPv6` viene inserito come payload per il datagramma `IPv4` che passa nel tunnel.
 
-# Inoltro generalizzato
-Per farlo si usa OpenFlow. E' uno standard facile da implementare bastato sull meccanismo match -> action. E' possibile rilevare vari tipi di match su un campo IP, banalmente IP src, IP destinazione, sul tipo, sull'intestazione TCP e' scegliere un'azione tra: drop, control, forward e modify
+> **Nota**: nel tunneling il pacchetto `IPv4` ha come destinazione l'estremità del tunnel!
+# OpenFlow
+Seguo l'astrazione `match+action`: ossia trovo una corrispondenza nei bit dei pacchetti e agisco di conseguenza.
 
-OpenFlow e' l'astrazione di una qualsiasi middle box in rete: per esempio un sistema OpenFlow puo' essere un router, uno switch di rete, un firewall ecc...
+> **Azioni**: `drop`, `forward`, `modify` o invia al **controllore**.
 
-# Algoritmi di instradamento
-Ora bisogna calcolare le tabelle di inoltro da installare nel nucleo della rete: come faccio? Si modella il problema come un grafo di archi di peso unitario dove si vuole cercare lo shortest path da un nodo, e tutto questo tenendo conto delle policy degli amministratori delle reti.
-Di solito si usano pesi unitari, oppure: archi inversamente proprozionali alla larghezza di banda, oppure archi proporzionali alla congestione su quel collegamento.
+> **Disambiguita**': attenzione a pattern sovrapposti!
 
-Gli algoritmi si classificano in:
-* Globali o decentralizzati: se globale ogni router ha una visione globale della rete, se decentralizzato il router non  calcola da solo la tabella di inoltro ma piuttosto scambia e riceve informazioni dai vicini
-* Sensibile al carico: se gli archi sono proporzionali al carico della rete, si preferisce di no
-* Dinamici o statici: reagisco subito, in modo dinamico ai cambiamenti che possono avvenire sulla rete?
+> **Nota**: per avere un compromesso tra funzionalita e complessita non posso fare `match` su tutti i campi di intestazione.
 
+OpenFlow puo' astrarre:
+* Router (`forward`)
+* Switch (`flood`)
+* Firewall (`permit`, `deny`)
+* NAT (`rewrite`)
+
+![[Pasted image 20250911234848.png]]
+# Piano di controllo
+Due approcci per gli algoritmi di instradamento:
+* controllo router per router.
+* centralizzato con software defined network.
+
+> *Volgiamo determinare un buon percorso*: ossia di **costo minimo** a patto di rispettare le **policy** degli amministratori delle reti.
+
+> *Si modella il problema come un grafo*, dove gli archi hanno peso **unitario** o **inversamente proporzionale** alla larghezza di banda, o alla **congestione**.
+
+*Classificazione degli algoritmi di instradamento*
+> Algoritmi **globali**: ogni router ha una visione globale della rete e calcola in autonomia.
+
+> Algoritmi **decentralizzati**: basato sullo scambio di informazioni con i nodi vicini.
+
+> **Sensibili al carico**: se uso archi proporzionali al carico della rete. Di solito non si usa, difficili da implementare!
+
+> **Dinamici**: reagisco immediatamente a cambi bruschi nella rete (es: un nodo va down)
+
+> **Statici**: meno sensibili
 # Dijkstra
-e' un'algoritmo globale, centralizzato. Ogni router esegue dijkstra per fatti suoi e calcola la sua tabella di inoltro.
+> Globale e centralizzato, dunque ogni router esegue una istanza di Dijkstra. Per farlo deve avere un'idea di come e' fatta la rete!
 
-La complessita temporale dell'algoritmo e' $O(nlogn)$ mentre per ogni nodo partono $O(n)$ messaggi in broadcast per informare tutti delle proprie connessioni.
+> **Nota**: alla $k$ esima iterazione, ho stimato correttamente la distanza **correttamente** verso $k$ destinazioni.
 
-L'algoritmo funziona cosi: il router $s$ stima la distanza da se stesso a 0 e gli altri a infinito. Ad ogni iterazione viene estratto il nodo con distanza stimata $s$ minore, e si guardano i nodi adiacenti a questo e si cerca di dare una stima migliore ai nodi non estratti.
+> **Nota**: complessità algoritmica pari a $O(nlogn)$
+> **Nota**: complessità dei messaggi scambiati pari a $O(n^2)$, dato che ogni nodo trasmette in broadcast a tutti lo stato dei suoi collegamenti.
 
-L'algoritmo termina sborrando
+Alla prima iterazione: l'algoritmo ha stimato la distanza da se stesso a 0 e agli altri nodi a **infinito**.
+
+*Ad ogni iterazione estraggo il nodo con distanza stimata minore e* guardo i nodi adiacenti per stimarli nuovamente.Nota
+
+Di conseguenza, con le distanze calcolate, posso calcolare la tabella di inoltro.
+
+> [!warning] oscillazioni
+> Se i costi dipendono dal volume di traffico, molto probabilmente nascono **oscillazioni** nei percorsi, ossia minimi *cambiamenti potrebbero stravolgere la tabella di instradamento*.
+
 # Distance Vector
-E' un algoritmo decentralizzato basato fortemente sullo scambio di messaggi. Utilizza la tecnica di programmazione dinamica, ma nella sua versione decentralizzata la formula viene applicata ogni volta che un nodo riceve informazioni sulle distanze dal nodo adiacente.
+> Decentralizzato, basato sullo scambio di messaggi. Programmazione dinamica ma applico la BF equation *ogni volta che viene modificato lo stato dei vicini*.
 
-Il nodo che riceve l'informazione sceglie se instradare verso il nodo sorgente, perche' ha una stima migliore e conviene usare il suo collegamento, oppure lo scarta perche' non conviene. Se tutti i nodi si scartano l'algoritmo termina, ma ci sono casi in cui l'algoritmo fatica:
-* cambiamenti bruschi: possono viaggiare lentamente le informazioni
-* cicli che portano la stima a salire all'infinito
+inizialmente posso stimare solo i vicini e notifico questi sulle distanze verso i miei vicini, ossia condivido il **vettore delle distanze**. Chi riceve il messaggio valuta se instradare verso di me o se scartare il messaggio.
 
+Il nodo che riceve l'informazione sceglie se instradare verso il nodo sorgente *se' ha una stima migliore e conviene usare il suo collegamento*, altrimenti lo scarta. Se tutti i nodi si scartano l'algoritmo termina, ma ci sono casi in cui l'algoritmo fatica:
+* **cambiamenti bruschi**: possono viaggiare lentamente le informazioni
+* **cicli** che portano la stima a salire all'infinito
+![[Pasted image 20250912134225.png]] ![[Pasted image 20250912134304.png]]
+
+> **Nota**: alla $k$ esima iterazione quando cambio qualcosa nel routing influenzo percorsi lunghi al piu $k$ nodi
+
+> [!warning] poisoned reverse
+> Per evitare questo tipo di problemi, prendendo in relazione la 2a foto: $z$ comunica a $y$ che ha distanza $\infty$ da $x$.
+
+Per evitare il conteggio all'infinito rappresentiamo infinito con archi di valore 16.
 # Scalare il routing
-e' stato assunto che tutti i router sono su una stessa rete, ma non e' cosi: per alleggerire il carico e per scalare meglio il sistema conviene avere delle sottoreti comunicati: ovvero degli Autonomous Systems.
+Abbiamo assunto che tutti i router siano sulla stessa rete ma non e' cosi. La rete e' ripartita in AS (Autonomous System), ossia una sotto-rete di router **sotto la stessa amministrazione** in grado di comunicare con altri AS. 
 
-Ogni AS  ha un ASN assegnato dallo IANAC, ed e' una collezione di router collegati tra loro che comunicano verso l'esterno grazie a dei border gateway router, che sono gestiti da un'azienda che ha delle policy da applicare a questi.
+> **Nota**: ogni AS ha un ASN assegnato dallo IANAC.
 
-Un pacchetto che viaggia in un AS potrebbe aver bisogno di:
-* uscire dall'AS, si parla quindi di InterAS routing, devo passare per forza per un gateway router.
-* raggiungere un'altro nodo nell'AS: IntraAS routing.
+> [!note] border gateway
+ permette la comunicazione verso l'esterno rispettando le policy degli altri AS.
+
+> [!note] routing
+> * intra-AS routing: instradamento all'interno dell'AS.
+ >* inter-AS routing: instradamento tra uno o piu AS.
+
+> **Nota**: si utilizza un solo protocollo nell'instradamento intra-AS.
+
+> **Nota**: l'instradamento inter-AS si occupa di capire quali rotte sono raggiungibili guardano gli AS adiacenti.
 
 Ci sono vari protocolli per effettuare il routing INTRA AS :
 * RIP: di tipo distance vecotr
 * OSPF: applica autenticazione ai messaggi, tipo dijkstra, utilizza archi pesati
-Comunque si scelga un algoritmo si incappera spesso in un'opportunita: cosa faccio quando ho piu path verso un nodo che hanno stessa lunghezza? Posso sfruttarli tutti e due applicando ECMP, ma come divido i pacchetti sui due path
-* per ip destinazione 
-* per appartenenza di flusso
-* hasing sul pacchetto? Prendere strade diverse potrebbe causare l'arrivo fuori ordine dei messaggi.
 
-Di solito si usa OSPF con un'approccio gerarchico, ossia, per scaricare meglio il carico computazionale dei messaggi, la rete e' divisa in dorsale e aree:
-* la dorsale usa dei router per comunicare con le aree
-* la dorsale e' l'unica ad essere connessa all'esterno
-* ogni area comunica solo cono la dorsale
-* lo scambio di messaggi e' limitato alla sola area
+> [!note] ospf
+> usa **flooding** per l'inoltro dei messaggi (dunque in broadcast) a tutti i router nell'AS, usando direttamente `IP`.
+> usa costo degli archi inversamente proporzionale alla lunghezza di bandan e con Dijkstra calcola le tabelle di inoltro.
+> I messaggi ospf sono **autenticati**.
 
-Serve a limitare il flooding.
+> [!note] ECMP (Equale Cost Multi Path)
+> In presenza di piu percorsi di costo uguale, faccio `load balancing` tra i `next hop` guardando:
+> * **flusso**: hasing sull'intestazione (guardo ip src e ip dst e le porte)
+> * hasing sulla **destinazione**
+> * per **pacchetto**: ma puo' creare problemi a `tcp` che si aspetta la conse
 
+> [!note] OSPF gerarchico
+> Di solito si usa OSPF con un'approccio gerarchico, per scaricare meglio il carico dei messaggi.
+> * Ogni nodo conosce la topologia della sua areaa
+> * C'e' un'**unica dorsale** dove si trova il router di bordo
+> * Ci sono delle **aree locali** collegate alla dorsale
+> *  Ogni area locale ha un **router di confine d'area**.
+> * *Le aree non sono collegate direttamente*.
 # BGP: inter as
-per fare il routing inter as si usa di solito BGP che e' diviso in due protocolli:
-* iBGP: per propagare l'informazione
-* eBGP: per annunciare l'informaizone all'esterno
-Le rotte possono essere propagate da eBGP e accettate se e solo se rispettano le policy.
+Per l'instradamento inter-domain si usa `BGP`:
+* permette ad un `AS` di annunciare rotte
+* permette con `eBGP` di ottenere informazioni sui sistemi confinanti.
+* permette con `iBGP` di propagare l'informazione all'interno dell'AS
 
-Una rotta BGP ha i seguenti attributi:
-* `NEXT_HOP`: il prossimo router che inizia l'`as_path`
-* `AS_PATH`: sequenza di `AS` da attraversare
+> [!note] sessione BGP
+> Due router si scambiano messaggi con una `tcp` semipermanente
+
+> [!note] rotta BGP
+ Una rotta BGP ha i seguenti attributi:
+> * `NEXT_HOP`: il prossimo router che inizia l'`as_path`
+> * `AS_PATH`: sequenza di `AS` da attraversare
 
 In caso di piu rotte BGP e' possibile selezionarne una in base a:
 * quella che mi libera prima del paccheto, ossia con il `NEXT_HOP` piu leggero
 * quella che ha `AS_PATH` piu corto
 * in base ad un ID assegnato da BGP
 
+> **Nota**: ogni router di bordo evitare di pubblicitare alcune rotte ricevute se non rispettano le policy.
+
+> **Nota**: `eBGP` prende le rotte dall'esterno e le inoltra con `iBGP` all'interno.
+
+> **Nota**: una rete `dual-homed` e' connessa a piu provider.
+
+> **Nota**: l'organizzazione ad AS nasconde all'esterno come questo sia fatto. Dico solo chi riesco a raggiungere e con quale costo.
+
+> **Nota**: `inter-AS` si concentra sulla policy, mentre `intra-AS` sulle performance.
 # controllore SDN
+Un'unico controller remote calcola e installa le tabelle in tutti i router.
+
+> **Nota**: generalmente programmare un sistema centralizzato e' piu semplice di uno distribuito.
+
+> **Nota**: con l'inoltro generalizzato posso facilmente decidere qualsiasi tipo di rotta io voglia. Con Distance Vector e' piu difficile.
+
+> **Nota**: l'architettura con controller SDN e' utile per il traffic engeneering.
+
 L'architettura del controllore e' la seguente (top-down):
-* livello applicativo: esecuzione di algoritmi, load balancing, firewall, ecc...
-* hardware del controller
+* livello applicativo, **applicazioni di rete**: esecuzione di algoritmi, load balancing, firewall, ecc...
+* SDN controller e il suo sistema operativo
 * switch di rete
-l'hardware comunica con il livello applicativo (veri e propri programmi in esecuzione sul controller, spessi scritti in python o java), grazie ad un'API northbound e comunica con gli switch di rete usando un'API southbound (es: protocollo OpenFlow)
 
-Questo sistema permette di fare i calcoli sul controller e di installare sui switch la computazione in modo modulare.
+L'SDN comunica:
+* verso l'alto con una API north-bound
+* verso il basso con una south-bound (es. OpenFlow)
 
-Il protocollo OpenFlow prevede tre classi di messaggi
-* controller to switch: forward, modify, configure, features
-* asynch
-* symmetric
+![[Pasted image 20250912151114.png]]
+
+**Protocollo OpenFlow**: OF oltre che definire i comandi per implementare le `whitebox` mette a disposizione 3 tipi di messaggi che costituiscono il suo Protocollo:
+* `controller-to-switch`
+* `asynchronous` (switch to controller)
+* `symmetric`
+
+Con i seguenti messaggi:
+* `features`: interrogo uno switch sulle sue caratteristiche
+* `configure`: interrogo e imposto lo switch
+* `modify-state`: modifico la tabella OpenFlow
+* `packet-out`: specifica la porta da cui esce il pacchetto
+
+> [!warning] esempio
+> Quando avviene un guasto e salta un collegamento: un nodo avvisa il controllore con un messaggio OpenFlow. Il sistema operativo del controllore aggiorna le sue informazioni e l'algoritmo di dijkstra viene chiamato dall'API del sistema operativo per eseguire.
+> ![[Pasted image 20250912152126.png]]
+> L'applicazione che calcola dijkstra accede alle `flow tables` del sistema operativo in modo centralizzato. 
+> L'API southbound del sistema operativo si occupa di installarle nei router della rete.
+
+> [!note] Intent-based Networking
+> L'amministratore puo' dire al `CDN` che si vogliono raggiungere degli obiettivi: come per esempio una certa latenza tra due nodi, dunque il sistema operativo autonomamente si adopera per farlo.
 # ICMP
-e' un porotocollo fondamentale per il layer di rete: si occupa di informare host e router sullo stato della rete.
+Usato tra host e router per comunicare informazioni di rete come errori e richieste di ping.
 
-Ogni messaggio del protocollo ha un tipo:
-* `3`: destinazione non raggiungibile
-* `4`: congestione
-* `8/10`: per fare ping request e ping reply.
-* `11`: TTL scaduto
+> **Nota**: `ICMP` e' trasportato direttamente dentro `IP` e tecnicamente sarebbe e parte del livello di trasporto ma non e' cosi.
 
+Un mesaggio `ICMP` e fatto di:
+* **tipo, codice** e checksum
+* intestazione
+* intestazione e primi 8 byte del datagramma ip di riferimento
+
+> **Nota**: tipo 3 usato per comunicare **errori** come destinazione non raggiungibile, frammentazione richiesta ecc...
+
+> **Nota**: tipo 11, codice 0 e' `TTL expired`, usato da `traceroute`
+
+> **Nota**: tipo 0, codice 0 e' `ping reply`, `(8,0)` e' `ping request`
+
+> **Nota**: `ICMPv6` e' per `IPv6`. Non esiste l'errore `frammentazione richiesta` ma viene detto: `packet too big`.
+
+> [!note] traceroute
+> invia una serie di pacchetti `ICMP` con `TTL` crescente fino ad arrivare a destinazione.
 # Network Manager
-Dato che le reti sono grandi e' complesse vogliamo ottenere delle statistiche, ed interpellare e controllare gli switch di rete. Per farlo ci sono vari protocolli.
+Le reti, sono grandi, complesse con migliaia di dispositivi, e voglio poterle gestire.
 
-## SNMP
-Database ad ogetti: interpello i MIB per ottenere informazioni. Spesso sono organizzati gerarchicamente, ogni MIB ha un identificatore e dei dati associati
+> [!note] Server di gestione
+> Raccolta, elaborazione e analisi delle informazioni. Invio di comandi.
+
+Ogni dispositivo di rete gestito ha dei dati che possono essere interpellati da un protocollo di gestione di rete
+
+Posso accedere a questi dati:
+* `CLI/UI Web`
+* `SNMP/MIB` interrogo un database per richiedere gli oggetti `MIB` usando `SNMP` (Simple Network Management Protocol)
+* `NETCONF/YANG`: `YANG` come linguaggio di modellazione dei dati e `NETCONF` per la comunicazione di azioni e dati tra i dispositivi.
+
+> **Nota**: `SNMP` funziona su `UDP`.
+
+ > Nota: la comunicazione avviene con **paradigma richiesta o risposta** da parte del server, o **trap** verso il server.
+
+I `MIB` sono usati come oggetti di un database, dunque esiste un linguaggio di definizione dei dati.
+
+> [!note] MIB
+> Ad ogni oggetto corrisponde un `ID`, organizzati in modo gerarchico!
+> I valori possono essere **scalari o tabulari**.
+
+
+## `NETCONF`
+Nasce per configurare in maniera attiva i dispositivi di rete, opera 
