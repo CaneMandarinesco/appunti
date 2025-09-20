@@ -1,4 +1,4 @@
-**Servizi del livello di trasporto**: Connessione **logica** tra due processi, che in generale si trovano su due end-point diversi. La connessione logica e' offerta anche dal livello sottostante, ma solo tra `end-point`, occorre effettuare il multiplexing/demultiplexing dei pacchetti in transito da e verso la giusta socket. In base al protocollo scelto il livello di trasporto si assicura che i pacchetti arrivino a destinazione. 
+**Servizi del livello di trasporto**: Connessione **logica** tra due processi, che in generale si trovano su due end-point diversi. La connessione logica e' offerta anche dal livello sottostante, ma solo tra `end-point`, occorre effettuare il multiplexing/demultiplexing dei pacchetti in transito da e verso la giusta socket. In base al protocollo scelto il livello [[Layer di Collegamento]]di trasporto si assicura che i pacchetti arrivino a destinazione. 
 
 **Implementazione del livello di trasporto**: implementato direttamente nel sistema operativo! Esiste una parte del kernel di linux deputato a gestire le connessioni `TCP`. 
 

@@ -1,15 +1,14 @@
-`ss`: sta per socket statistic.
-* `ss -s` mostra le socket aperte per categoria. `INET` e' la somma di tutte le socket aperte.
-* `ss -u` mostra le socket udp **connesse**
-* `ss -ua` mostra le socket in tutti gli stati
-* `ss -uan` mostra le socket senza traduzione della porta usando `/etc/services`
-* `ss -uanE` mostra le socket alla distruzione
-
-## `udpserver.c`
-```c
-int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-if(sockfd == -1) err;
+```bash
+ss -s
 ```
-* `AF_INET`: usa `IPv4`
-* `SOCK_DGRAM`: usa datagrammi
-* `IPPROTO_UDP`: usa `UDP`. Poteva essere omesso e inferito dai primi due (dato che ho specificato che uso datagrammi).
+mostra statistiche sull'uso delle socket aperte.
+
+```bash
+ss -ua
+```
+mostra le socket `udp`, con `-a` voglio tutte le socket, anche quelle non connesse.
+
+```bash
+ss -uanE
+```
+`-n` mostra le porte come valori numerici, senza tradurle nel servizio corrispondente. `-E` mostra le socket alla loro distruzione!

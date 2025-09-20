@@ -202,9 +202,26 @@ Dunque il **mittente**:
 
 ### `mtu` e `mss`
 `mss` e' la lunghezza massima dei dati, a livello di trasporto. Si ricava a partire dalla `mtu`.![[Pasted image 20250909140751.png]]
-Il valore della `mtu` puo' essere ottenuto tramite un `mtu path discovery`. Di base la `mtu` e' pari a 1500 di pende dal protocollo di collegamento.
+Il valore della `mtu` puo' essere ottenuto tramite un `mtu path discovery`. Di base la `mtu` e' pari a1500 di pende dal protocollo di collegamento.
 
+> **Nota**: la `MTU` e' la dimensione massima di un pacchetto a livello di rete. `MSS` e' la dimensione massima del payload `TCP`
+
+> **Nota**: dunque `MSS = MTU - IP header - TCP header`, ossia con `MTU=1500`, la `MSS` e' di `1460`.
 ### segmento tcp
+![[Pasted image 20250917164933.png]]
+
+* `seq number`: numero di sequenza che mi aspetto di riscontrare
+* `ack number`: numero di `ack` che ho riscontrato in sequenza
+* `ACK`, `SYN` e `FIN` per gestire la connessione `TCP`
+* `window size`: per comunicare quanti byte sono disposto ad accettare
+
+> [!note] `ack number` e `seq number`
+> * `ack number`: vuol dire che tutti i segmenti fino ad `ACK-1` sono stati riscontrati e che devo ancora riscontrare `ACK`!
+> * `seq number`: si riferisce al primo byte di dati che sto inviando, e quindi mi aspetto di riscontrare `seq number+len` dal ricevente. 
+
+> [!warning] `ID`
+> non esiste un campo `ID`.
+
 
 ![[Pasted image 20250909141154.png]]
 
@@ -284,26 +301,32 @@ La trasmissione e' limitata in modo che: $\text{LastByteSent} - \text{LastByteAc
 
 ### AIMD (Incremento Additivo, Decremento Moltiplicativo)
 La tecnica prevede di:
-* **far crescere di** `1MSS` per ogni messaggio la `cwnd`
+* **far crescere di** `1MSS` **OGNI RTT** per ogni messaggio la `cwnd`
 * **far decrescere, dimezzando**, ogni volta che rilevo segni di congestione
+
+> [!warning] aumento
+> E' di `1MSS` per ogni RTT, ossia `1MSS/cwnd`
 ### TCP RENO
 Come in AIMD ma:
-* triplo `ACK` $\to$ dimezzo `cwnd`.
-* timeout $\to$ decremento `cwnd` di `1MSS`.
+* triplo `ACK` $\to$ dimezzo `cwnd` e vado in **fast retransmit**
+* timeout $\to$ decremento `cwnd=1` e vado **slow start**.
 
 > **Nota**: `AIMD` e' praticamente un'algoritmo **asincrono** e distribuito in **quanto** e' stato dimostrato che ottimizza i flussi congestionati in tutta la rete.
+
+> [!note] fast retransmit
+> *Reinvio immediatamente IL pacchetto non riscontrato*.
 
 > [!note] slow start
 > Ad inizio connessione, faccio crescere **esponenzialmente** la `cwnd` iniziando da `1MSS`. Appena rilevo una perdita mi fermo torno a crescere additivamente.
 
-> [!note] `ssthresh`
+> [!note] `ssthresh` e `slow start`
 > La `cwnd` dovrebbe crescere esponenzialmente dunque fino a `1/2` del valore raggiunto prima della perdita, ossia `ssthresh`
 
 Quando in **slow start** supero `ssthresh` vado in `congestion avoidance`: aumento la cwnd con `MMS^2/cwnd`, ossia incremento di `1 MSS` ogni `RTT`.
 
 Quando in congestion avoidance ottengo 3 ack duplicati vado in fast recovery: incremento`cwnd` in modo additivo ed eventualmente vado in congestion avoidance
 ### TCP Cubic
-sia $W_{max}$ l'mss misurato prima della congestione, allora:
+sia $W_{max}$ la `cwnd` misurato prima della congestione, allora:
 * mi avvicino **velocemente** a $W_{max}$, molto probabilmente va ancora bene come valore limite. (di solito in rete non ci sono **cambiamenti bruschi**)
 * quando sono vicino **cresco molto lentamente**
 * Quando rilevo perdita scendo di un fattore moltiplicativo
@@ -330,4 +353,12 @@ Quindi guardando $RTT$ misurato in un determinato istante, so quando sono lontan
 > **Nota**: `TCP` e' fair, con l'andare del tempo le connessioni tendono a condividere equamente la banda.
 
 > **Nota**: quando si verificano perdite e riesco a tornare a $W_{max}$, il troughtput medio effettivo e' di $3W/4RTT$
+
+### QUIC: Quick UPD Internet Connections
+* faccio `handshake` **sicuro** e cifrato in 1 solo rtt
+* Posso gestire molteplici flussi a livello di applicazione
+* 
+
+> **Nota**: `TCP` sicura richiede 2RTT: handshake TCP + handshake TLS per la cifratura.
+
 

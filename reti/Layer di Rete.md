@@ -92,11 +92,10 @@ L'indirizzamento `IP`:
 > [!note] suddivisione fissa in classi
 > 
 Prima di CIDR si usava una suddivisione in classi fissa degli IP:
-> * A: inizia con `01` e la maschera di rete e' di 8 bit
-> * B: inizia con `011` e la maschara di rete e' di 16 bit
-> * C: inizia con `0111` e la maschera di rete e' di 24 bit
+> * A: inizia con `0` e la maschera di rete e' di 8 bit
+> * B: inizia con `10` e la maschara di rete e' di 16 bit
+> * C: inizia con `110` e la maschera di rete e' di 24 bit
 > * D per **multicast** mentre E **riservato**
-
 ### Dynamic Host Configuration Protocol
 Ma come ottengo un indirizzo ip valido, unico nella sottorete? *Semplice, lo chiedo mannaggia la puttana*! Con **DHCP**. 
 
@@ -196,7 +195,7 @@ Due approcci per gli algoritmi di instradamento:
 
 Alla prima iterazione: l'algoritmo ha stimato la distanza da se stesso a 0 e agli altri nodi a **infinito**.
 
-*Ad ogni iterazione estraggo il nodo con distanza stimata minore e* guardo i nodi adiacenti per stimarli nuovamente.Nota
+*Ad ogni iterazione estraggo il nodo con distanza stimata minore e* guardo i nodi adiacenti per stimarli nuovamente.
 
 Di conseguenza, con le distanze calcolate, posso calcolare la tabella di inoltro.
 
@@ -305,10 +304,11 @@ L'SDN comunica:
 
 ![[Pasted image 20250912151114.png]]
 
-**Protocollo OpenFlow**: OF oltre che definire i comandi per implementare le `whitebox` mette a disposizione 3 tipi di messaggi che costituiscono il suo Protocollo:
-* `controller-to-switch`
-* `asynchronous` (switch to controller)
-* `symmetric`
+> [!note] Protocollo OpenFlow
+ oltre che definire i comandi per implementare le `whitebox` mette a disposizione 3 tipi di messaggi che costituiscono il suo Protocollo:
+> * `controller-to-switch`
+> * `asynchronous` (switch to controller)
+> * `symmetric`
 
 Con i seguenti messaggi:
 * `features`: interrogo uno switch sulle sue caratteristiche
@@ -334,7 +334,7 @@ Un mesaggio `ICMP` e fatto di:
 * intestazione
 * intestazione e primi 8 byte del datagramma ip di riferimento
 
-> **Nota**: tipo 3 usato per comunicare **errori** come destinazione non raggiungibile, frammentazione richiesta ecc...
+> **Nota**: **tipo 3** usato per comunicare **errori** come destinazione non raggiungibile, frammentazione richiesta ecc...
 
 > **Nota**: tipo 11, codice 0 e' `TTL expired`, usato da `traceroute`
 

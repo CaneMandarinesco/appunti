@@ -1,49 +1,57 @@
-* `/etc/hosts`: mappature locali di nomi e indirizz
-* `/etc/nsswitch.conf`: ordine delle fonti
+* `/etc/hosts`: associazioni locali personalizzate
+* `/etc/resolv.conf`: chi devo contattare per il dns 
+* `/etc/nssitch.conf` ordine in cui leggere le risorse per risolvere i nomi
 
-Il seguente comando manda una interrogazione al DNS server e mostra le risposte, similmente a quanto fa `nslookup`:
 ```bash
 dig +norecurse @dns.google.com uniroma2.it
 ```
+questo comando chiede al dns di google di risolvere uniroma2.it senza usare ricorsione, quindi mi ritorna il prossimo server da contattare per ottenere il record `A`.
 
-con il seguente comando avremo come risposta `NXDOMAIN`: ossia non essite!
+Il record richiesto compare nella sezione autoritativa, nella sezione delle risposte non ho niente.
+
 ```bash
-nslookup asdasdasd.uniroma2.it
+dig +norecurse @8.8.8.8 uniroma2.it
 ```
 
-invece con:
+fa la stessa cosa di prima.
+
+> [!note] `rd` e `ra`
+> `rd`: ricorsione richiesta
+> `rd`: se la ricorsione e' accettata
+
+
 ```bash
-nslookup -type=MX uniroma2.it
+nslookup web.uniroma2.it
 ```
-avremo tutti i record per server di posta `SMTP`, dove per ogni entry abbiamo un `preference value`.
+Il comando risolve per me, il nome e ritorna l'ip.
 
-possiamo dunque risolvere `mx-01.uniroma2.it` cosi:
+
+> [!note] `NXDOMAIN`
+> ottengo come risposta `NXDOMAIN` se non e'siste!
+
+
+> [!note] `type=A`
+> Se in `nslookup` specifico `type=A` richiedo esplicitamente che non venga ritornato un campo `AAAA` per `ipv6`.
+
 ```bash
-nslookup -type=A mx-01.uniroma2.it
-```
-
-per ottenere i root-server:
-```bash
-nslookup -type=NS .
-```
-
-### query iterative
-```bash
-nslookup -nosearch -norecurse -type=A web.uniroma2.it 198.97.190.53
-```
-*dove l'indirizzo ip fornito e' di un root server* dove `-norecurse` indica che voglio una query iterativa, dunque il root server non contattera altri server.
-
-Ottengo in risposta i **referral** per i nameserver responsabili del dominio `.it`.
-
-Contattando il nameserver fornito, ottengo l'ip per web.uniroma2.it
-
-> Con sezione `autoritativa` si intendo i server che gestiscono l'area di domini in questione.
-
-Con il seguente comando ottengo il server autoritativo per `uniroma2.it`
-```bash
-nslookup -type=NS uniroma2.it
+nslookup -norecurse -nosearch -type=A web.uniroma2.it 198.97.190.53
 ```
 
-Con `dig` ottengo un *output piu verboso* rispetto a `nslookup` per la risoluzione dei nomi, di solito richiede il record di tipo `A`
+Con `-nosearch` evito di provare a risolvere usando la `search` list dei domini.
 
-Quando richiedo il tipo `A`, `dig` mi fornisce la catena di alias (ossia record di tipo `CNAME`) che mi porta al record `A`.
+```bash
+dig +noall +answer @46.166.189.68 www.ibm.com
+```
+
+> [!note] `search list`
+> La search list e' una lista di nomi da provare a utilizzare per risolvere domini incompleti. Se per esempio eseguo `nslookup server1`, automaticamente provo `server1.com` `server1.stocazzo.net` ecc.... Se indico `--nosearch` allora evito di provare queste combinazioni definite localmente.
+
+> [!note] name server
+> danno solo risposte iterative!
+
+```bash
+dig +trace uniroma2.it
+```
+Il comando mostra i passaggi iterativi per la risoluzione del server.
+
+> **Nota**: con `ANY` ottengo tutti i campi associati ad un dominio

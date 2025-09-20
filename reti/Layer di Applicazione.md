@@ -189,6 +189,8 @@ Perché' introdurre una cache?
 * **scenario**: tra i client e il server c'e' un collegamento che fa da **bottleneck**.
 
 > **Nota**: con le opzioni `If-Modified-Since` ed `ETag` evito di riscaricare la risorsa! `get-condizionale`.
+
+> **Nota**: con la `GET` condizionale ottengo la risorsa se e solo se la mia copia e' troppo vecchia.
 # `E-mail`: `SMPT`
 Ci sono tre figure principali:
 * **user agent**: scrive, e legge i messaggi, che sono memorizzati su un server.
@@ -296,9 +298,15 @@ Con `nslookup` e `dig` posso interrogare i server dns da riga di comando.
 Domande e risposte hanno lo stesso formato:
 ![[Pasted image 20250906153648.png]]
 * `identificazione`: un id per associare domande e risposte.
-* `flag`: il messaggio e' domanda o risposta? voglio la ricorsione? sono un `DNS` autoritativo?
+* `flag`: per esempio `rd` per recursion desired e `ra` per recursion available.
 * `sezione delle risposte`: contiene l'**RR**
-* `sezione autoritativa`: contiene record per i server autoritativi!
+* `sezione autoritativa`: contiene record per i server autoritativi.
+
+> [!warning] `sezione autoritativa`
+> Contiene informazioni sui server autoritativi per quella zona!
+
+> [!warning] `sezione addizionale`
+> Contiene informazioni aggiuntive per la risoluzione, come per sempio i campi `A` per i nameserver nella sezione autoritativa
 
 Per aggiungere il mio sito al `DNS` devo, per esempio `diocane.com`:
 * aggiungere il record `(diocane.com, dns1.diocane.com, NS)` nel `TLD` per `.com`.
