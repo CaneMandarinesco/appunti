@@ -113,3 +113,6 @@ La tabella dei simboli e' in grado di esportare la definizione di `_main` ma inv
 
 > **Nota**: la `call` per `_a` fa riferimento all'indirizzo `0x0` dato che non puo' essere risolto.
 
+Quando si fa il link per il programma finale, ogni segmento ha un padding per farlo arrivare al boundary di `4K`, per matchare la grandezza delle pagine in `x86`.
+
+Il segmento di testo contiene il codice di una libreria di startup, chiamato `start-c`, poi `m.o` relocato a `10a4` e `a.o` relocato a `10b4`.
