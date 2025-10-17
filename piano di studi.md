@@ -14,7 +14,7 @@ Sessione Gennaio-Febbraio:
 * Big Data
 * Crittograf
 * IA
-* LMP
+* Algebra e geometria
 
 Sessione Giugno-Luglio:
 * Data mining
@@ -22,5 +22,5 @@ Sessione Giugno-Luglio:
 * Vulnerabilita
 
 Settembre:
-* Algebra Lineare
+* LMP
 * Ingegneria Software
