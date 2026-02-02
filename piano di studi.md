@@ -14,13 +14,17 @@ Sessione Gennaio-Febbraio:
 * Big Data
 * Crittograf
 * IA
-* Algebra e geometria
+* lmp
 
 Sessione Giugno-Luglio:
 * Data mining
 * IR
 * Vulnerabilita
+* Algebra (???)
 
 Settembre:
-* LMP
+* Algebra
 * Ingegneria Software
+
+Ottobre:
+* laurea!
