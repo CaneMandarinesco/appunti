@@ -28,7 +28,7 @@ L'algoritmo base per edit distance occupa **troppa memoria**, si applicano quind
 Il problema può' essere riformulato come problema di shortest path sul grafo G per andare da $(0,0) \text{ a } (n,m)$, dove per ogni nodo $(x,y)$  e' definita $f(x,y):= \text{distanza da} (0,0) \text{ a } (x,y)$, si vuole dunque trovare $f(n,m)$. 
 
 Ad ogni arco di $G$ , corrisponde una scelta che può fare l'algoritmo: 
-![[Pasted image 20250629163602.png]]
+![[immagini/Pasted image 20250629163602.png]]
 
 La formulazione tramite Grafo e' potente perché:
 * E' possibile invertire gli archi di $G$ per poter risolvere comunque il problema. (**fondamentale**, per es. la edit distance di $CIAO$ e' la stessa di $OAIC$).
