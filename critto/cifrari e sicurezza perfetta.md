@@ -21,6 +21,9 @@
 
 **Analisi del testo**: Sub Cipher vulnerabile ad analisi delle frequenze.
 
+**Cifrario Affine**:
+* $e_{K}(x) = ax + b \mod 26$
+* $e_{K}(y) = (y-b) a^{-1} \mod 26$
 # Sicurezza Perfetta (Stinson Paterson)
 **Probabilita Condizionata**: $P[X|Y] = \frac{P[Y|X] \cdot P[X]}{P[Y]}$.
 
@@ -33,7 +36,7 @@
 
 **Cosa vuol dire Perfect Secrecy**: conoscere $Y$ non avvantaggia un'attaccante.
 
-**C. Affine non ha Perfect Secrecy**: 
+**C. Affine non ha Perfect Secrecy** su messaggi a piu caratteri: 
 * se $y_{i} = y_{k}$ allora so che $x_{i}=x_{k}$ (e viceversa). 
 * Inoltre per messaggi più lunghi di un carattere vale che $|\mathcal K| < |\mathcal P|$
 * Per **Teorema 2.5**, $|\mathcal K| < |\mathcal P|$ invalida Perfect Secrecy.
@@ -44,13 +47,10 @@
 * $K$ uniforme e random su $\mathcal K$
 * messaggi di un solo carattere.
 * Allora ogni chiave e' equiprobabile dato $y$.
-
-
 # Sicurezza Perfetta (Boneh Shoup)
 **One Time Pad**: crittosistema basato su $\oplus$ (**XOR**).
 
-**Two-Time Pad Vulnerabile**: $c_{1} \oplus c_{2} = (m_{1} \oplus K) \oplus (m_{1} \oplus K) = m_{1} \oplus m_{2}$
-
+**Two-Time Pad Vulnerabile**: $c_{1} \oplus c_{2} = (m_{1} \oplus K) \oplus (m_{2} \oplus K) = m_{1} \oplus m_{2}$
 
 **Perfect Secrecy**: sia $\mathcal E$ Shannon Cypher (ossia un cifrario). $\mathcal E$ ha perfect sercecy se
 * $\forall m, m_{0} \in M, \forall c \in C$
@@ -67,3 +67,66 @@
 ![[Pasted image 20260303014248.png]]
 
 **Conseguenza del Teo 2.5**: devo avere più chiavi che messaggi, ma e' un requisito troppo stretto nella realta.
+
+# Vigener (Stinson Paterson)
+**Vigener**: applico una chiave di lunghezza fissa sul plaintext
+* $y_{i} = (x_{i} + k_{i \mod m}) \mod 26$.
+
+**Crittoanalisi**: 
+* **lunghezza chiave** $m$: da indovinare.
+* **distanza** $\delta_{i}$: distanza tra segmenti di testo identici nel cyphertext.
+* **osservazione**: $m$ MCD di tutti gli $\delta_{i}$.
+
+**Indice di Coincidenza**: $I_{c}(x) := \text{p. che in una stringa ci siano 2 caratteri uguali}$
+
+**Formula per** $I_{c}(x)= \frac{\sum^{25} \binom{f_{i}}{2}}{n(n-1)}=  \frac{\sum^{25}f_{i}(f_{i}-1)}{n(n-1)}$
+* *$f_{i}:= \text{ frequenza con cui il carattere } i \text{ appare nel cyphertext}$
+**Stima di $I_{c}(x)$ stima per la lingua inglese**:
+* $p_{i} := \text{occorrenza stimata di una lettera secondo la tabella in Stinson Paterson}$. 
+* $I_{c}(x)\sim \sum^{25}p_{i}^2 = 0.065$
+
+**Usare $I_{c}(x)$ per indovinare** $m$:
+
+![[Pasted image 20260303142616.png]]
+
+* **se $m$ e' corretto**: $I_{c}(x)$ si comporta similmente a quanto stimato.
+* **se $m$ non e' corretto**: $I_{c}(x)$ si comporta come una distribuzione uniforme.
+
+**Trovare lo shifting** $k_{i}$:
+* $k_{i}$ shift applicato alla lettera $i\text{-esima}$ nella suddivisione in stringhe
+* $k_{i}$ tale che $\frac{f_{k_{i}}}{n}, \frac{f_{k_{i+1}}}{n},\dots$ vicini a $p_{0}, \dots, p_{25}$.
+
+# Semantic Security (Boneh Shoup)
+**sicurezza semantica**:
+* sia $\mathcal A$ un'attacco, veloce ed efficiente
+* sia $m_{0}, m_{1}$ scelti dall'attaccante
+* sia $k$ una chiave scelta **u.a.r.**
+* sia $\epsilon$ negligibile, tale da rendere l'attacco irrilevante in pratica.
+* **Allora**: $Adv_{SS}[\mathcal A,\mathcal E] = |P[\mathcal A(E(k,m_{0}))=1] - P[\mathcal A(E(k,m_{1}))=1]| \leq \epsilon$
+* **Ossia**: la probabilità di capire se il cyphertext $c$ appartiene a $m_{0}$ oppure $m_{1}$.
+
+**A che serve**?: la sicurezza semantica e' un requisito forte per i cifrari ma meno restrittivo della sicurezza perfetta.
+
+# Fermat (si basa su Aritmetica Mod n e Gruppi)
+**Gruppo moltiplicativo**: $G$.
+* $Z_{n}^*$ e' l'insieme dei coprimi con $n$.
+**Ordine di** $G$: $ord(G)=\# \text{elementi in }G$.
+**Ordine di** $g\in G$: $ord(G)=min\{n>0 \text{ t.c. } g^n=1\}$
+
+**Teorema Lagrange**: $ord(g) | ord(G)$
+**Corollario Teo Lagrange**: con $Z_{n}^*$ gruppo moltiplicativo, $b\in Z_{n}^*$ allora $b^{\phi(n)} \equiv 1 \mod n$.
+* **dim**: $ord(Z_{n}^*)=\phi(n)$.
+
+**Teorema Fermat**:  Sia $p$ primo, $b \in Z_{p}^*$, allora: $b^p \equiv b \mod p$
+* **dim**: con $b\neq 0$, $\phi(p)=p-1$. Allora $b^{p-1} \equiv 1 \mod p$, moltiplicando si ottiene $b^p \equiv b \mod p$.
+
+# Algoritmo Euclideo
+**Algoritmo Euclideo**: serve a trovare $\gcd(a,b)$.
+![[Pasted image 20260303152926.png]]
+**Algoritmo Euclideo esteso**: serve a riscrivere il $\gcd$ come combinazione lineare di $a$ e $b$.
+![[Pasted image 20260303152909.png]]
+
+**Teorema**: un'inversa moltiplicativa per $a \mod n$ esiste se e solo se $\gcd(a,n)=1$.
+
+# 
+
