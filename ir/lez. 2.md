@@ -1,0 +1,46 @@
+# indexer steps
+**sort**: faccio **sort delle righe** rispetto alla prima colonna, ossia per termini ed il **sort dei documenti** nelle posting lists.
+
+**merge**: faccio merge dei termini che compaiono in più documenti con la posting lists.
+
+**puntatori**: i termini hanno puntatori alle loro posting lists.
+
+**Strutture dati**:
+* **per ogni termine** il numero di occorrenze e puntatore alla posting lists
+* **per ogni termine** la posting lists che descrive i documenti in cui compare.
+
+## processare le query
+
+**AND**: voglio i documenti che contengono due termini.
+* **come**: faccio il merge delle posting lists per fare l'intersezione dei documenti per i due termini.
+* **costo**: $O(x+y)$, devo scorrere entrambe le posting lists.
+* **ottimizzazione** a 3 operatori: *prima la lista più corta*.
+
+**Boolean Retrieval Model**: uso espressioni booleane `AND`, `OR`, `NOT`.
+
+> [!warning] fare esercizi sulle query
+
+**Per ottimizzare le query**: devo conoscere la frequenza delle parole per ogni documento, in modo da ottimizzare le query.
+
+
+## phrase queries
+**Come faccio** a rispondere a query come *"stanford university"* (deve contenere stanford e *subito dopo* university)?
+
+**Biword Index**: indicizza le coppie di parole adiacenti
+* **complessita**: il numero di coppie e' più di $O(n)$ ma meno di $O(n^2)$
+* **query lunghe**: *posso fare l'AND di piu biword*
+* **and di piu biword**: ***Introduce falsi positivi** $\equiv$ **penalizzo la precision**
+
+**Sol. al biword index**: memorizza la posizione per ogni termine, in ogni documento, una posting lists delle posizioni in cui compare.
+
+**Problema di spazio**: memorizzare la posizione di ogni termine, per ogni documento, vuol dire praticamente copiare il dataset originale.
+
+**Entita nominali**: conviene in fase di processazione del testo riconoscere come **bigramma** nomi come `Michael Jackson`, tuttavia tengo in memoria anche `Michael` e `Jackson`.
+* **query piu richieste**: sfrutto il fatto che certe combinazioni sono piu richieste. 
+* *devo trovare **tradeoff** tra spazio e tempo quando costruisco questi indici*
+
+
+
+
+
+
