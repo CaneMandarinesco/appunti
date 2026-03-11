@@ -66,3 +66,13 @@ nmap -p 31000-32000 -v -A -T4 localhost
 * `-v`: verboso
 * `-A`: aggressive text
 * `-T4`: timing stretto, non attendere troppo
+
+# bandit 19-20
+**setuid e setgid**: permette gli utenti di avviare un eseguibile con i permessi su file system del proprietario o del gruppo. Permette di elevare temporaneamente i permessi ad un utente nel contesto di esecuzione di un programma.
+
+**chmod ricorsivamente**:
+```bash
+`find /path/to/directory -type d -exec chmod g+s '{}' '\'`
+```
+
+
