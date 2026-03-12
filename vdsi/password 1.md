@@ -5,7 +5,7 @@
 
 **password overload**: molte persone usano la stessa password su piu siti.
 
-**charset ristretto**: uso solo i caratteri della tastiera invece di quelli possibili. 
+**charset ristretto**: di solito uso solo i caratteri della tastiera invece di quelli possibili. 
 * se la password usa in modo uniforme tutti i bit: $\frac{1}{256^8}$
 * password usa solo lettere e numeri: $\frac{1}{36^8}$
 
@@ -17,12 +17,24 @@ password con **bassa entropia**: sono password facili da ricordare, dove una seq
 
 **attacco a dizionario**: si applica facilmente a password con bassa entropia su un set di password da testare.
 
-# wordlist
+# wordlist: generare dizionari da usare
 **wordlist**: esistono wordlist pubbliche con le password piu probabili.
+
+**user list**: devo provare a indovinare come e' fatto il nome utente, salvo i nomi probabili da testare in un file `userlist.txt`
+
+**password list**: ho bisogno di una lista di password. le metto in `passwordfile.txt`
+
+**List precompilate**: in kali  ne ho gia una per le password: `/usr/share/wordlists/rockyou.txt.gz`. John the ripper ha la sua in `/usr/share/john/password.lst`.
 ## crunch
-**crunch**: tool che crea wordlist basandosi su **combinazioni matematiche**
+**crunch**: tool che crea wordlist basandosi su **combinazioni matematiche**. Tecnica di **bruteforcing**.
 
 **quando uso crunch?** se conosco la struttura della password.
+
+```bash
+crunch 7 7 AB
+```
+* **lunghezza**: `7 7` genera parole di lunghezza 7.  `7 8` genera parole di lunghezza da 7 a 8
+* **caratteri**: `AB` vuol dire che uso i caratteri `A` e `B`
 
 ## cewl
 **cewl**: custom wordlist generator. Permette di creare wordlist **context-aware**
@@ -30,27 +42,43 @@ password con **bassa entropia**: sono password facili da ricordare, dove una seq
 cewl https://www.target.xyz -w targetWL.txt
 ```
 
+```bash
+cewl -w bulbwords.txt -d 1 -m 5 www.bulbsecurity.com
+```
+
+* -**d**: depth per lo scraping
+* -**m**: lunghezza minima della parola da generare
+
 **quando uso cewl**? per generare password basate sulle parole dentro un sito. (utile se devo fare pentest in una azienda).
 
 ## anarchy
 **username anarchy**: genera gli username potenziali usando nome e cognome.
 **quando uso anarchy**?: pentest in una azienda dove di solito i nomi utente seguono un pattern.
 
-# attacco online
+# hydra: attacco online
 **hydra**: tool con cui mando richieste di login (verso SSH, Web Login, ecc...)
 * **latenza**: il server potrebbe limitare il mio troughput
 * **visibilita**: ogni attempt viene loggato sulla macchina
 * **lockout**
+* **firewall**: puo' accorgersi di me e bloccarmi.
 
 **con hydra**: vengo sgamato subito.
 
-# attacco offline
+```bash
+hydra -L userlist.txt -P passwordfile.txt 192.168.20.10 pop3
+```
+
+* -**l**: se conosco gia l'utente da attaccare lo posso specificare.
+
+# attacco offline con hashcat e john
 **hashcat e john the ripper**: si usano quando ho il database delle password crittografate.
 * **velocita**: dipende dalla mia macchina
 * **invisible**: faccio tutto in locale
 
 ## nascondere le password
-**hash function**: dato l'hash e' impossibile tornare al testo in chiaro se non si consce come funziona la funzione di hashing
+**hash function**: sono funzioni one-way. Nel senso che se conosco $h$ posso facilmente calcolare $h(x)=y$ ma da $y$ e' difficile risalire ad $x$.
+
+**come attacco**? se ho le password crittografate e conosco $h$ posso calcolare $h(x)$ su un database di password in chiaro e trovare riscontri nelle password crittografate.
 
 **salt**: una stringa random che viene aggiunta alla password. Password identiche di utenti diversi non collidono.
 
