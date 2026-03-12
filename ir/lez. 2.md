@@ -1,28 +1,29 @@
 # indexer steps
-**sort**: faccio **sort delle righe** rispetto alla prima colonna, ossia per termini ed il **sort dei documenti** nelle posting lists.
+**matrice di incidenza**: per ogni termine salvo se compare o meno in ogni documento
+**vettore di incidenza**: i valori per ogni termine costituiscono un vettore
+![[Pasted image 20260311234311.png]]
+
+**sort**: faccio **sort delle righe** per termini ed il **sort dei documenti** nelle posting lists.
 
 **merge**: faccio merge dei termini che compaiono in più documenti con la posting lists.
 
 **puntatori**: i termini hanno puntatori alle loro posting lists.
 
-**Strutture dati**:
+![[Pasted image 20260312000053.png]]
+
+**Strutture dati**. Devo ricordare:
 * **per ogni termine** il numero di occorrenze e puntatore alla posting lists
 * **per ogni termine** la posting lists che descrive i documenti in cui compare.
 
 ## processare le query
+**boolean retrieval model**: dato che mi trovo in un modello booleano, voglio comporre le query usando `AND, OR` e `NOT` per fare le query.
 
 **AND**: voglio i documenti che contengono due termini.
 * **come**: faccio il merge delle posting lists per fare l'intersezione dei documenti per i due termini.
 * **costo**: $O(x+y)$, devo scorrere entrambe le posting lists.
 * **ottimizzazione** a 3 operatori: *prima la lista più corta*.
 
-**Boolean Retrieval Model**: uso espressioni booleane `AND`, `OR`, `NOT`.
-
-> [!warning] fare esercizi sulle query
-
 **Per ottimizzare le query**: devo conoscere la frequenza delle parole per ogni documento, in modo da ottimizzare le query.
-
-
 ## phrase queries
 **Come faccio** a rispondere a query come *"stanford university"* (deve contenere stanford e *subito dopo* university)?
 

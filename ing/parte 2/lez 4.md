@@ -1,6 +1,6 @@
-**documento wsdl**: descrive l'interfaccia al servizio e come si invoca. E' un **istanza** di un **diagramma a oggetti** che descrive tutti i port *type e i loro binding*.
+**documento wsdl**: e' un documento XML che descrive **l'interfaccia pubblica** di un WebService e le **modalita di invocazione**. E' un **istanza** di un **metamodello WSDL** che descrive tutti i port *type e i loro binding*.
 
-**port type**: in*sieme di operazioni raggruppate e fornite su un end-point di rete*. Simile ad un modulo.
+**port type**: e' **l'interfaccia**, in*sieme di operazioni raggruppate e fornite su un end-point di rete*. Simile ad un modulo.
 
 **bindings**: *lega il port-type ad un particolare protocollo con il suo formato di dati*, per erogare il servizio in rete attraverso un **URI**. E' un oggetto vero e proprio o una relazione.
 
@@ -12,7 +12,7 @@
 
 **qos charatteristic**: ogni caratteristica raggruppa delle **qos dimension** che vanno misurate.
 
-**XMI**: standard che permette di passare da metamodello in forma di diagramma a classi in una rappresentazione XML.
+**XMI**: standard per scambiare informazione di metadati. Trasforma un modello/diagramma a classi in una rappresentazione XML.
 
 **applicazione di q-wsdl**: 
 * specificare qos requirements
@@ -41,38 +41,43 @@
 * **approccio 1**: un'unico URL per accedere al servizio
 * **approccio 2 con rest**: ho 3 risorse differenti per i 3 tipi di membri della compagnia aerea.
 
-**single apporach**: unico URL. Quando arriva la richiesta il server deve capire da che tipo di utente arriva la richiesta e reindirizzarla al servizio giusto.
-* **il web server che accoglie le richieste e' unico**, se va giu nessuno dei 3 utenti puo' usare il servizio.
+**single apporach (sbagliato)**: 
+* **unico** URL. 
+* **arriva una richiesta**: il server deve capire da che tipo di utente arriva la richiesta e reindirizzarla al servizio giusto.
+* **single point of failure**
 * **assioma 0**: violato
 
-**approccio rest**: i clienti premier hanno il loro url, i clienti flyer un'altro e i clienti base un'altro ancora.
+**approccio rest**:
+* **ogni tipo di client ha il suo url**
 * **single point of failure**: non c'e'!
 * **assioma 0**: consistente.
 * **url autoesplicativo**: guardando l'url so che servizio ho richiesto.
 
-**transacition pattern**: richiesta client to service che e' costituita di una sequenza di operazioni che devono essere tutte eseguite.
+# pattern di transazione 
+**transaction pattern**: e' una richiesta client to service che e' costituita di una sequenza di operazioni che devono essere tutte eseguite in ordine.
 
 **ACID**: Atomicita, Consistenza, Isolazione e Durabilita.
 
-**two phase commit protocol**: ambito dei bonifici
+**two phase commit protocol**: *amtbio dei bonifici*. 3 entita:
 * **first bank service**: da chi trasferisco i soldi
 * **second bank service**: dove trasferisco i soldi
-* **coordinator**
+* **coordinator**: arbitro centralizzato
 
 **prima fase**: 
-1. coordinatore manda `prepareTo commit` ad entrambi i servizi
-2. al prepareTo ogni servizio fa il `lock` dei dati
-3. quando hanno fatto i servizi comunicano `readyTo commit`
+1. **invia** `prepareTo commit`: arbitro manda il segnale ai service
+2. **ricevo**: ogni servizio fa il `lock` dei dati
+3.  **invia** `readyTo commit`: ogni servizio invia il messaggio all'arbitro
 
 **seconda fase**:
-1. coordinatore manda `commit` ad entrambi servizi
-2. al `commit` i servizi fanno `unlock`
-3. i servizi mandano `commit completed` al coordinatore.
+1. **invia** `commit`: arbitro manda il segnale ai service
+2. **ricevo** `commit`: i servizi fanno `unlock`
+3. **invia**: `commit completed` i servizi mandano  al coordinatore.
 
-**compound transaction pattern**: una transazione puo' essere splitatta in piu sottotransazioni. 
+**compound transaction pattern**: 
+* **sottotransazioni**: una transazione divisa in piu sottotransazioni.
 * ***errore**: in caso di errore devo fare un **rollback parziale**, perche' le sotto transazioni sono indipendenti tra loro.
 
-**long living transaction**: split della transazioni in modo tale da considerare l'human loop.
+**long living transaction**: split della transazioni in modo tale da considerare l'**human loop**. Devo attendere l'intervento umano, dunque la *transazione puo' durare molto tempo*.
 * **esempio**: transazione per riservare un posto fino a quando non acquisto l'oggetto.
 
 **negotiation pattern**: il cliente fa una proposta, deve essere valutata ed eventualmente negoziata per arrivare al successo.
@@ -84,8 +89,7 @@
 	* **offer service**
 	* **reject/accept request/proposal**.
 
-**cosa e' un servizio**? puo' essere un volo dove non posso negoziare la data. oppure posso negoziare la destinazione.
+**cosa e' un servizio**? può essere un volo dove non posso negoziare la data. oppure posso negoziare la destinazione.
 
-**orchestrazione servizi**: un controller **centralizzato** coordina piu servizi
-
-**choreography**: come orchestrazione ma **decentralizzato**. 
+**orchestrazione servizi**: un controller **centralizzato** coordina più servizi
+**coreografo**: come orchestrazione ma **decentralizzato**. 

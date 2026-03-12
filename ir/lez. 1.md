@@ -36,6 +36,7 @@
 **Array fisso Per Invertex Index**: *non va bene*. Alcuni termini la riempiono, altri no, enorme spreco al caso peggiore.
 
 **Posting Lists Per Invertex Index**: e' una Linked List e va bene allo scopo. E' fatta di **posting**, **ordinata** per `docID`.
+**frequency**: e' utile registrare la frequenza con il quale un termine compare in un documento.
 
 **Merge di una linked List**: avanzo su due Posting Lists in ordine, in modo da cercare i documenti che compaiono in entrambi.
 
@@ -44,7 +45,7 @@
 
 **Costruzione di un Inverted Index**:
 * **tokenizer**: per esempio rimuovo punteggiature ecc... Ottengo una **stream di token**, per separare le parole
-* **linguistic modules**: faccio il lower  case per esempio, voglio **normalizzare** i token. Ma magari il cognome `Rossi` diventa `rossi`, ossia un colore! Greve! 
+* **linguistic processing**: faccio il lower  case per esempio, voglio **normalizzare** i token. Ma magari il cognome `Rossi` diventa `rossi`, ossia un colore! Greve! 
 	* Come gestisco i token `U.S.A` e `USA`?
 	* Posso **troncare la desinenza** in inglese
 	* si fa **lemmatizzazione** in italiano (es: da `studentessa` a `studente`).
@@ -53,4 +54,9 @@
 * **rimozione stop words**: devo togliere `the`, `a`, `of`? Queste hanno una lista lunga lunga lunga... non e' discriminativa nella mia ricerca e dunque la tolgo. Ma la band `The Who` scomparirebbe nel database!
 * **indexer**: mi crea le liste sul prodotto dei linguistic modules.
 
+**Costruzione dell'inverted index** (sorting e raggruppamento):
+1. **costruisci** la lista di coppie: $(\text{term}, \text{docID})$
+2. **sort**: ordina la lista di coppie per $\text{term}$
+3. **unisci** le occorrenze dei termini creando un dizionario del tipo $(\text{term}, \text{doc.freq.}, \text{*postings list})$
+4. $\text{*postings list}$ e' il puntatore alla postings list
 
