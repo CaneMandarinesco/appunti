@@ -9,7 +9,7 @@
 
 **Precision**: ossia la **qualita**, *frazione di documenti trovati* che rispettano la richiesta informativa. 
 * **Risponde alla domanda**: *"Tra tutto quello che mi hai dato, quanto è effettivamente utile?"*
-* **Massimizzare la precision**: gemini aiutami te.
+* **Massimizzare la precision**: vuol dire aumentare la qualita dei risultati rendendo il sistema selettivo.
 
 **Recall**: frazione di documenti rilevanti nella collezione, che sono stati trovati.
 * **Risponde alla domanda**: *"Tra tutto quello che esiste di utile nel database, quanto sei riuscito a trovarne?"*
@@ -28,18 +28,19 @@
 * **notazione sparsa**: in una notazione sparsa, memorizzi **solo i valori diversi da zero**, annotando la loro posizione (indice).
 
 **Nota**: *non conviene usare notazione densa su un dato per sua natura sparsa*.
-
 ## Invertex Index
 **Indice Inverso**: voglio vedere per ogni parola quale documento lo contiene, *ossia: per ogni termine $t$ voglio una lista di documenti che lo contiene*.
 * `docID`: **numero seriale** corrispondente al documento.
 
 **Array fisso Per Invertex Index**: *non va bene*. Alcuni termini la riempiono, altri no, enorme spreco al caso peggiore.
 
-**Posting Lists Per Invertex Index**: e' una Linked List e va bene allo scopo. E' fatta di **posting**, **ordinata** per `docID`.
-**frequency**: e' utile registrare la frequenza con il quale un termine compare in un documento.
+**Posting Lists Per Inverted Index**: e' una Linked List e va bene allo scopo. E' fatta di **posting**, **ordinata** per `docID`.
+
+**document frequency**: e' utile registrare la frequenza con cui il termine compare in tutti i documenti processati.
+
+**term frequency**: e' utile registrare la frequenza con cui un termine compare in un documento
 
 **Merge di una linked List**: avanzo su due Posting Lists in ordine, in modo da cercare i documenti che compaiono in entrambi.
-
 ![[Pasted image 20260306124936.png]]
 
 
@@ -56,7 +57,10 @@
 
 **Costruzione dell'inverted index** (sorting e raggruppamento):
 1. **costruisci** la lista di coppie: $(\text{term}, \text{docID})$
-2. **sort**: ordina la lista di coppie per $\text{term}$
+2. **sort**: ordina la lista di coppie per $\text{term}$ e poi per $\text{docID}$
 3. **unisci** le occorrenze dei termini creando un dizionario del tipo $(\text{term}, \text{doc.freq.}, \text{*postings list})$
 4. $\text{*postings list}$ e' il puntatore alla postings list
 
+![[Pasted image 20260318094400.png]]
+
+![[Pasted image 20260318094725.png]]
