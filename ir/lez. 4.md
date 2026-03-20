@@ -52,23 +52,32 @@
 * **indice ausiliario in RAM**: $Z_{0}$ di grandezza $2^0 n$.
 * **indice ausiliario in ROM** $I_{0}$: viene creato quando $|Z_{0}| > n$.
 * **indice ausiliario in ROM** $I_{1}$: viene creato facendo il merge di 2 indici $Z_{0}$ con $I_{0}$
-* indice ausiliario in ROM $I_{2}$: viene creato facendo il merge di 2 indici $Z_{1}$ con $I_{1}$
+* **indice ausiliario in** ROM $I_{2}$: viene creato facendo il merge di 2 indici $Z_{1}$ con $I_{1}$
 
 **vantaggio di log merge**: faccio molti merge ma su collezioni piccole. vado a toccare quelle grandi poche volte.
 
-**in memoria ram ho**: $Z_{0}$, il piu piccolo e si trova in RAM.
-**in memoria fissa ho**: $I_{i}$
+**Costo log merge**:
+* **numero di merge**: faccio al piu $O\left( \log\left( \frac{T}{n} \right) \right)$ merge.
+* **costo totale dei merge**: faccio al piu $O\left( T \log \left( \frac{T}{n} \right) \right)$ operazioni.
 
-**Costo**:
-* $T = \text{ numero di postings}$
+**correzione input utente**: per farlo devo sapere qual'era probabilmente la parola che voleva inserire l'utente, ossia quella piu frequente tra i documenti.
 
-...
+**calcolare frequenza parole**: con piu' indici e' difficile. Devo vedere quali documenti sono stati invalidati e ricalcolare la frequenza della parola. **E' un'operazione lenta.**
+
+**soluzione**: uso solo l'indice principale per rispondere le query. in parallelo ricostruisco l'indice da 0, quando e' pronto lo sostituisco con quell principale.
+
 # early bird su twitter
-**funzione di recupero e ordinamento a costo 0 su hashtag**: prendo l'ultimo tweet in coda dalla posting lists. costa 0!!!!!
+**obiettivo**: sono interessato ai tweet piu nuovi.
 
-earlybird index organization: ...
+**multiple index segments**: segmenti piccoli che contengono fino a $2^{32}$ tweet, ogni posting e' una parola a 32 bit.
 
-**positional index**: 
+**parole a 32 bit**: perche' e' la dimensione di una word che un processore riesce a gestire con istruzioni native.
 
+**posting**: 24 bit per il tweet id e 8 per la posizione nel tweet.
+
+**aggiungo alla posting list**: appendo sempre alla fine
+**traversal della posting list**: dalla fine, in modo da ottenere i tweet piu nuovi.
+
+**indici read-only**: solo un indice puo' essere scritto e letto. Gli altri sono ottimizzati per essere read-only.
 # index compression
 **decompressione**: deve esse fast.
