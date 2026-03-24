@@ -1,5 +1,4 @@
-> [!warning] studia /etc/passwd ed /etc/shadow
-
+ > [!warning] studia /etc/passwd ed /etc/shadow
 
 **password**: segreto condiviso tra utente e servizio.
 
@@ -13,7 +12,7 @@ password con **bassa entropia**: sono password facili da ricordare, dove una seq
 
 **OSINT/SOCMINT**: con tecniche di social engineering posso capire in base agli interessi di una persona che parole potrebbe usare. (conseguenza della bassa entropia)
 
-**shannon entropy**: misura la sicurezza di una password.
+**shannon entropy**: misura il grado di incertezza di una password.
 
 **attacco a dizionario**: si applica facilmente a password con bassa entropia su un set di password da testare.
 
@@ -70,6 +69,11 @@ hydra -L userlist.txt -P passwordfile.txt 192.168.20.10 pop3
 
 * -**l**: se conosco gia l'utente da attaccare lo posso specificare.
 
+```bash
+hydra -t 4 -l EdoMan000 -P /usr/share/wordlists/rockyou.txt -vV 10.10.10.6 ftp
+```
+* **-t 4**: connessioni parallele (threads)
+* **-vV**: very verbose
 # attacco offline con hashcat e john
 **hashcat e john the ripper**: si usano quando ho il database delle password crittografate.
 * **velocita**: dipende dalla mia macchina
@@ -88,14 +92,12 @@ hydra -L userlist.txt -P passwordfile.txt 192.168.20.10 pop3
 ## linux password
 **/etc/shadow**: `id salt hash : other-stuff : ...`
 * $\text{hash} = H_{id}(\text{salt} || \text{password})$.
-* $H$ e' **yescrypt** 
+* $H$ e' **yescrypt** su molte distribuzioni linux. Prima si usava SHA-512
+* **root**: l'unico che puo' leggerlo.
 
 **yescrypt**: invece di essere CPU intensive, usa tanta memoria per criptare. E' piu difficile per l'attaccante perche' ha bisogno di tanta ram per decriptare.
 
 ## tool di password cracking
-**dizionario**: ...
-
-
 **john the ripper**: si basa sulla potenza computazionale del processore.
 
 > [!warning] john the ripper
@@ -104,21 +106,19 @@ hydra -L userlist.txt -P passwordfile.txt 192.168.20.10 pop3
 
 **unshadowing**: `unshadow /etc/passwd /etc/shadow` produce un file per john the ripper.
 
-## single-crack
 ```bash
 john --single hashesFile
 ```
-il comando per ogni utente prova le combinazioni di password a partire dal nomeutente. hashesfile e' stato prodotto da unshadow.
+**single crack**: il comando prova per ogni utente le combinazioni di password a partire dal nome utente. hashesfile e' stato prodotto da unshadow.
 
 `john.conf`: contiene le regole su come funziona john
 
-`john -w=/path/to/wordlist hashesFile`: usa la wordlist data per sborrare su hashesFile
+`john -w=/path/to/wordlist hashesFile`: usa la wordlist data per attaccare hashesFile
 
 **rockyou**: un esempio di wordlist da usare.
 
 **se l'attacco fallisce?** con `-rules=All` posso applicare delle regole.
 
-## incremental
 **incremental**: prova tutte le combinazioni possibili
 
 **incremental limitato**: prova l'attacco su un insieme ristretto di combinazioni. posso specificare lunghezza minima e massima
@@ -130,11 +130,40 @@ Uso le mie regole e la mia wordlist (presa magari dal sito dell'azienda).
 
 **custom rules**:
 * `c`: capitalize la prima lettera
+* `A0`: inserisci prima
+* `Az`: aggiungi alla fine
+* `abc`: piazza **qui** la stringa **abc**
+* `[xyz]`: prova **x**, poi **y** e poi **z**
+* `@sXY`: sostituisci **X** con **Y**
+![[Pasted image 20260312230831.png]]
+![[Pasted image 20260312230839.png]]
+![[Pasted image 20260312230850.png]]
+**preprocessors**: sono i tool `[fileFormat]2john` e si occupano di
+1. **strip**: dei dati inutili
+2. **extract**: estrarre l'hashing crittografico o il sale
+3. **format**: formatta l'hash in modo che jtr lo capisca
 
-**preprocessors**
+**hashcat**:
+```bash
+hashcat -m 0 -a 0 -o cracked.txt hashes.txt /usr/share/wordlists/rockyou.txt
+```
+* **-m 0**: MD5
+* **-a 0**: attacco normale, modalita dizionario.
+* **-o cracked.txt**: file di output per le password craccate
 
-**hashcat**
+```bash
+hashcat -a 6 example.dict '?d?d?d?d' --stdout
+```
+* **-a 6**: attacco con maschera sulle password del dizionario
+* `?d?d?d?D`: maschera da applicare
 
-**attacco alle cose compresse**
+```bash
+hashcat -m 0 -a 1 –j ‘$_’ dict1.txt dict2.txt –stdout
+```
+* **-a 1**: combination mode
+* **-j**: regola per la combinazione
+* **dict1.txt e dict2.txt**: dizionari da combinare
 
-## crack online
+## archivi e altri formati
+* **fcrackzip**: `fcrackzip -u -b -v -D -p myWordlist.txt target.zip`. **Attacca un zip protetto da password**.
+* `[format]2john` sono tool che attaccano il determinato `[formato]` protetto

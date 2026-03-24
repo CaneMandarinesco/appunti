@@ -7,7 +7,7 @@ https://www.thehacker.recipes/
 **LAN Manager Hash**: LM e' un algoritmo di hashing. Ora deprecato ma ancora usato.
 
 **SAM(Security Accounts Manager)**:  database locale di un sistema windows standalone
-**NTDS.dit**: contiene le password degli utenti in rete.
+**NTDS.dit**: È il database di **Active Directory**. Non contiene solo password, ma l'intera struttura del dominio (oggetti, gruppi, permessi). Si trova solo sui Domain Controller (DC).
 
 ## SAM
 **SAM**: file database, che contiene le password criptate. Mantiene un **lock** sul file per accederlo.
@@ -54,10 +54,12 @@ samdump2 sam xpkey.txt
 **DES**: viene usato per crittografare le due meta di plaintext.
 **Come si attacca**? *Devo criptare tutte le possibli combinazioni da 1 a 7 caratteri di stringhe finche non trovo lo stesso hash che sto attaccando.*
 
-## NT Hash
+## NTLM o  NT Hash
 **LSASS** (Local Security Authority Subsystem service): recupero le credenziali in cache per sessioni attive dalla memoria processo `lsass.exe`.
 
-**Pass-the-hash**: possibile con SSO (gemini spiega tu)
+**Pass-the-hash**: 
+* **auth via rete**: ho bisogno solo dell'hash NT e non della password originale.
+* **conseguenza**: mi basta rubare l'hash dall'avversario
 
 **mimikatz**: tool di **post exploitation** (sono gia all'interno della macchina).
 * **dump di SAM**: `lsadump::sam SystemBkup.hiv SamBkup.hiv` estrae gli hash degli utenti (similmente a come fatto prima)
@@ -90,11 +92,13 @@ samdump2 sam xpkey.txt
 
 **Obiettivo attacchi**: redirezionare il traffico , cosi da ottenere credenziali.
 
-**redirezionare il traffico**: gemini che si intende in questo contesto? redireziono l'autenticazione?
+**redirezionare il traffico**: inganno il client affinche provi ad autenticarsi con la macchina dell'attaccante. Se il client sbaglia a digitare il nome di una cartella condivisa avviene una richiesta DNS che su un protocollo legacy puo' **essere attaccata**
 
-**forced authentication attacks**: che si intende gemini per forced?
+**forced authentication attacks**: costringo la vittima a connettersi al mio serve.
 
 **responder**: fa name poisoning per **forced authentication attaccks**
 * **DNS fails**: la vittima fa una richiesta DNS usando un protocollo legacy. *responder gli dice di inoltrare il traffico a me.*
 * **NTLMv2 handshake**: il client inizia l'handshake con responder.
 	* **invia una sfida statica**: `1122334455667788
+	* mi aspetto di ricevere il valore della sfida combinato con l'hash della password dell'utente da autenticare.
+	* ricevo dunque l'hash mischiato ad altri dati statici.
