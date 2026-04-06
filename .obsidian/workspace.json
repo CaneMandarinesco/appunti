@@ -1,0 +1,225 @@
+{
+  "main": {
+    "id": "e32cff92a20adc22",
+    "type": "split",
+    "children": [
+      {
+        "id": "7406327b837dd8e9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6c5ade69366c41fd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "dm/lez. 3.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "lez. 3"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "48989c716aee127b",
+    "type": "split",
+    "children": [
+      {
+        "id": "c474f49465eed472",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2b339ba989f7de13",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Esplora risorse"
+            }
+          },
+          {
+            "id": "254a7298362e380b",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Ricerca"
+            }
+          },
+          {
+            "id": "66c3799935322cd8",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Segnalibri"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "right": {
+    "id": "15ae8579f38bf862",
+    "type": "split",
+    "children": [
+      {
+        "id": "3efbd8255ce99ee5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4c297c830d40d47b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "vdsi/bandit passwords.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Riferimenti a bandit passwords"
+            }
+          },
+          {
+            "id": "a3cdbb43359e1198",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "vdsi/bandit passwords.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Collegamenti in uscita da bandit passwords"
+            }
+          },
+          {
+            "id": "42ce09b887384f7f",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etichette"
+            }
+          },
+          {
+            "id": "66246ca16b6d8ffa",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Tutte le proprietà"
+            }
+          },
+          {
+            "id": "68260f8db801c808",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "vdsi/bandit passwords.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Struttura di bandit passwords"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Apri selezione rapida": false,
+      "graph:Apri vista grafo": false,
+      "canvas:Crea nuova lavagna": false,
+      "daily-notes:Apri nota del giorno": false,
+      "templates:Inserisci modello": false,
+      "command-palette:Apri riquadro comandi": false,
+      "bases:Crea nuova Base": false
+    }
+  },
+  "active": "6c5ade69366c41fd",
+  "lastOpenFiles": [
+    "dm/lez. 2.md",
+    "dm/lez. 3.md",
+    "tesi uzzo.md",
+    "Senza nome",
+    "vdsi/linux offensive 2.md",
+    "vdsi/linux offensive 1.md",
+    "vdsi/bandit passwords.md",
+    "vdsi/bandit.md",
+    "makefile/intro ai Makefile.md",
+    "programma magistrale.md",
+    "ir/lez. 5.md",
+    "ir/lez. 4.md",
+    "dm/lez. 1.md",
+    "dm",
+    "Pasted image 20260320130437.png",
+    "Pasted image 20260320130039.png",
+    "Pasted image 20260320124821.png",
+    "Pasted image 20260320124059.png",
+    "Pasted image 20260320115157.png",
+    "Pasted image 20260318121849.png",
+    "Pasted image 20260318114401.png",
+    "Pasted image 20260318113735.png",
+    "Pasted image 20260318094725.png",
+    "Pasted image 20260318094400.png",
+    "vdsi/htb.md",
+    "vdsi/linux intro 2.md",
+    "vdsi/password 1.md",
+    "vdsi/windows.md",
+    "vdsi/linux intro 1.md",
+    "orario lezioni.md",
+    "ir/lez. 2.md",
+    "ir/lez. 1.md",
+    "ing/parte 2/lez 1 ood.md",
+    "ing/parte 2/lez 2 principi progettazione.md",
+    "ing/parte 2/lez 4.md"
+  ]
+}
