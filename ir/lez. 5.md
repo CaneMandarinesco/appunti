@@ -81,14 +81,35 @@ compressione della posting: devo tenere in memoria i $\text{docID}$ che su 400.0
 **obiettivo**: utilizzare pochi bit se l'intero ne richiede pochi.
 **soluzione**: variable length encoding con **unary code**.
 
-
 **unary code**: conto gli uni e poi metto uno 0
 ![[Pasted image 20260320130437.png]]
 
 **gamma code**:
 * rappresentare numeri in binario, ma devo identificare dove inizia uno e finisce l'altro.
 * **osservazione**: ogni numero binario inizia con 1, lo posso togliere.
-* $13\to 1101 \to 101$
-* mi devo ricordare che $101$ e' lungo 3: in unario e' $1110$
-* dunque mischiando le due cose: $1110.101$.
-* **codifica** **ottima**: 
+* **offset**: $13\to 1101 \to 101$
+* **length:** mi devo ricordare che $101$ e' lungo 3: in unario e' $1110$
+* dunque mischiando le due cose: $1110.101$. (length concatenato ad offset)
+
+**analisi di spazio**: $G$ viene codificato usando $2 \log G +1$ bit
+* **offset**: $\log G$ bit
+* **length**: $\log G + 1$ bit, il numero di uni che metto in unario e' logaritmico.
+
+**allineamento su byte**: se il gammacode non me' allineato, allora calano le performance (devo leggere piu byte se il dato si trova a cavallo tra 2 byte)
+
+**VB (Variable Byte) codes**:
+* **obiettivo**: usare meno byte possibili
+* **continuation bit** $c$: usa un bit di ogni byte per indicare se devo leggere altri byte.
+* se $G \leq 127$: codifico usando 7 bit e imposto $c=1$
+* se $G > 127$: codifica i 7 bit piu bassi e calcola nei successivi byte i bit rimanenti allo stesso modo.
+	* **continuation bit**: l'ultimo byte ha $c=1$, gli altri hanno tutti $c=0$
+
+**tradeoff**: byte aligment consuma molto spazio se i gap sono piccoli.
+
+**soluzione**: 
+* **word aligned** a 32 o 64 bit
+* codifica piu numeri in una botta sola
+
+**google**: codifica 4 byte in 5-17 bytes
+* **primo byte**: indica la lunghezza di ciascuno dei 4 byte usando 2 bit ciascuno.
+* **pro**: decodifica del primo byte usando una *lookup table*
