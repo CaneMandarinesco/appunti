@@ -22,7 +22,6 @@
 
 **ricerca dei vicini**: si cercano in $O(k log n)$
 
-
 ## scipi e codice
 ```python
 from scipy.spatial import KDTree

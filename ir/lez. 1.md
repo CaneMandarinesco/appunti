@@ -29,10 +29,13 @@
 
 **Nota**: *non conviene usare notazione densa su un dato per sua natura sparsa*.
 ## Invertex Index
+**Indice**: ad ogni query invece di scansionare i testi vado a leggere un indice creato nella fase di indicizzazione.
+
 **Indice Inverso**: voglio vedere per ogni parola quale documento lo contiene, *ossia: per ogni termine $t$ voglio una lista di documenti che lo contiene*.
 * `docID`: **numero seriale** corrispondente al documento.
+![[Pasted image 20260420180804.png]]
 
-**Array fisso Per Invertex Index**: *non va bene*. Alcuni termini la riempiono, altri no, enorme spreco al caso peggiore.
+**~~Array fisso Per Invertex Index~~**: *non va bene*. Alcuni termini la riempiono, altri no, enorme spreco al caso peggiore.
 
 **Posting Lists Per Inverted Index**: e' una Linked List e va bene allo scopo. E' fatta di **posting**, **ordinata** per `docID`.
 
@@ -40,9 +43,15 @@
 
 **term frequency**: e' utile registrare la frequenza con cui un termine compare in un documento
 
+**bisogno informativo**: e' il topic rispetto a cui l'utente vuole informarsi.
+**query**: l'utente comunica al computer di quale informazione ha bisogno.
+
+**dizionario**: e' fatto di termini. per ogni termine ho una linked list, chiamata posting che registra in quali documenti il termine compare.
+* **postings**: insieme delle postings list
+* **postings list**: la singola entry della postings.
+
 **Merge di una linked List**: avanzo su due Posting Lists in ordine, in modo da cercare i documenti che compaiono in entrambi.
 ![[Pasted image 20260306124936.png]]
-
 
 **Costruzione di un Inverted Index**:
 * **tokenizer**: per esempio rimuovo punteggiature ecc... Ottengo una **stream di token**, per separare le parole
@@ -54,6 +63,20 @@
 	* **polisemia**: le parole hanno tanti significati.
 * **rimozione stop words**: devo togliere `the`, `a`, `of`? Queste hanno una lista lunga lunga lunga... non e' discriminativa nella mia ricerca e dunque la tolgo. Ma la band `The Who` scomparirebbe nel database!
 * **indexer**: mi crea le liste sul prodotto dei linguistic modules.
+
+**Costruzione dell'inverted index**, a grandi linee:
+1. **Colleziona** i documenti da indicizzare
+2. **Tokenizzazione**: ogni documento diventa una lista di token.
+3. **Preprocessing**: alcuni token danno fastidio o sono strani, li **normalizzo**.
+4. **indicizza** i documenti nell'inverted index per ogni termine che compare in almeno un documento.
+
+$\text{docID}$: in una collezione di documenti, assumiamo che ogni documento abbia un identificatore unico.
+
+**input per indexing**: e' un insieme di coppie $(\text{term,docID})$
+
+**sorting delle coppie**: data in input le coppie $(\text{term,docID})$ voglio ordinarle alfabeticamente.
+
+**document frequency**: per ogni termine salvo la frequenza con cui compare. Serve per ottimizzare le query booleane.
 
 **Costruzione dell'inverted index** (sorting e raggruppamento):
 1. **costruisci** la lista di coppie: $(\text{term}, \text{docID})$
