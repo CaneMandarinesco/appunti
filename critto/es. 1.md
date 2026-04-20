@@ -1,6 +1,6 @@
 
-##attacco a permutazione
-* guardo le lettere piu frequenti e i digrammi, trigrammi piu frequenti e assegno la permutazione in base a cosa mi conviene.
+## attacco a permutazione
+* guardo le lettere piu frequenti, i digrammi, i trigrammi piu frequenti e assegno la permutazione in base a cosa mi conviene.
 ## attacco a vigenere
 **Test di kasiski**: nel testo compare spesso il trigramma `HJV`.
 * Le distanze tra i trigrammi sono: $18,138,54,12$

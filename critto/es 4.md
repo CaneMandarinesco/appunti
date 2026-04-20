@@ -1,3 +1,4 @@
+## es 7, punto B
 **D:** Consideriamo il numero primo p = 101527 e sia E la curva ellittica su $F_{p}$ definita dall'equazione $y^2 = x^3 + x$. Dedurre che $E(\mathbb F_{}p)$ e' isomorfo a Z/(p + 1)Z
 
 **R1:** dimostrare che $\# E(\mathbb F_{p})$ ha $p+1$ elementi.
@@ -36,3 +37,60 @@
 	* **Dunque**: Avendo un solo punto di ordine 2, il sottogruppo di 2-torsione è isomorfo a $\mathbb Z_{2}$ e _non_ a $\mathbb Z_{2} \oplus \mathbb Z_{2}$. (gemini, che vuol dire).
 * allora $n_{1} = 1$ ed $n_{2} = p+1$.
 * **(3)**: se $n_{1} = 2$, allora il gruppo ha la forma $\mathbb Z_{2} \oplus \mathbb Z_{n_{2}}$, con condizione $2|n_{2}$, ossia $n_{2}$ e' pari.
+# Es 7
+## A: controlla se $P \in E$
+Lo script python risolve l'esercizio:
+* per verificare $P\in E$ devo verificare $50342^2 \equiv (-2)^3-2\mod p$
+* per verificare l'ordine basta vedere se $\min \{ n: [n]*P=0 \} = p+1$
+```python
+def calcola_ordine(P):
+    n = 1
+    Q = P
+    # finche' Q non e' il punto all'infinito
+    while Q != E(0):
+        Q = Q+P
+        n+=1
+    return n
+
+p = 101527
+F = GF(p)  # Campo finito F_p
+
+# Definisco la curva ellittica E: y^2 = x^3 + x
+E = EllipticCurve(F, [1, 0])
+
+P = E(-2, 50342)
+
+if P in E:
+    print("Il punto P appartiene alla curva E.")
+    if calcola_ordine(P) == p+1:
+        print("L'ordine di P e' p+1, ossia: ", p+1)
+else:
+    print("Il punto P non appartiene alla curva E.")
+```
+
+## C: calcolare logaritmo discreto di $Q=(56355,4891)$ in base $P$. Ossia $n$ tale che $n\cdot P = Q$
+```python
+import math
+
+def bsgs(N,P,Q):
+    m = math.isqrt(N)
+    L = {}
+    for j in range(m):
+        L[j*P] = j
+    for i in range(m):
+        R = Q-((i*m)*P)
+        if R in L:
+            return (L[R] + m*i) % N
+    return -1
+
+p = 101527
+F = GF(p)
+E = EllipticCurve(F, [1,0])
+P = E(-2, 50342)
+Q = E(56355, 4891)
+print(bsgs(p, P, Q))
+```
+
+![[Pasted image 20260414124336.png]]
+# Es 3
+![[Pasted image 20260414124355.png]]
