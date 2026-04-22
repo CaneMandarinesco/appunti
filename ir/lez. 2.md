@@ -48,6 +48,38 @@ Ottimizzare: $(\text{madding OR crowd}) \text{ AND } (\text{ignore OR strife}) \
 * tengo in memoria uno stato
 * identifico l'ordine con cui fare le operazioni
 * vai!
+
+## tokenizzazione (approfondimento)
+**tokenizzazione**: prendo una sequenza di caratteri e la taglio in vari punti, ottenendo i tokens.
+
+**token**: una sequenza di caratteri raggruppati ed e' un'unita semantica.
+
+**type**: tutti i token con la stessa sequenza di caratteri
+**term**: sinonimo di type. E' un type incluso nel dizionario del sistema IR.
+
+**come faccio tokenizzazione**? sicuramente devo togliere **spazi** e **punteggiatura**, ma...
+* come divido in token parole che contengono un'apostrofo? es: `O'Neill` ed `aren't`
+
+## stop words (approfondimento)
+**stop words**: sono quei termini che compaiono troppo spesso e che non hanno valore informativo.
+
+**identificare le stop words**: tolgo i 10 termini piu frequenti in tutta le collezione dei documenti, da ciascun documento.
+
+**problema**: come cerco nomi propri, canzoni, testo dove invece quelle stop words erano rilevanti se le tolgo?
+
+## normalizzazione (approfondimento)
+**token normalizzazione**: voglio canonizzare i token in modo che differenze superficiali tra 2 token producano lo stesso termine.
+**cosa vuol dire canonizzare**: voglio che `anti-discriminatory` sia mappato a `antidiscriminatory`, `car` mappato a `automobile`, ecc...
+
+**come**? creo liste di sinonimi oppure quando costruisco il dizionario faccio la normalizzazione del termine.
+
+## stemming (approfondimento)
+**stemming**: voglio tagliare gli ultimi caratteri di un termine, a cazzo di cane. 
+
+**lemmatization**: a differenza dello stemming, taglio la radice, devo quindi analizzare per bene la parola.
+
+**esistono algoritmi che fanno lemmatization**
+
 ## phrase queries
 **Come faccio** a rispondere a query come *"stanford university"* (deve contenere stanford e *subito dopo* university)?
 
@@ -56,12 +88,19 @@ Ottimizzare: $(\text{madding OR crowd}) \text{ AND } (\text{ignore OR strife}) \
 * **query lunghe**: *posso fare l'AND di piu biword*
 * **and di piu biword**: ***Introduce falsi positivi** $\equiv$ **penalizzo la precision**
 
-**Sol. al biword index**: memorizza la posizione per ogni termine, in ogni documento, una posting lists delle posizioni in cui compare.
+**phrase index**: indicizza un numero arbitrario di parole adiacenti.
+* **nota**: *un phrase index di 3 termini introduce meno falsi positivi di un biword*!
+
+**Sol. al biword index**: memorizza la **posizione** per ogni termine, in ogni documento, una posting lists delle posizioni in cui compare.
+
+**positional index**: dunque non si usa il biword index.
+* **posting**: ha la forma $\text{docID: } <\text{pos1,pos2,...}>$.
+* una query richiede $\Theta(T)$ con $T = \# \text{ di termini nella collezione}$
 
 **Problema di spazio**: memorizzare la posizione di ogni termine, per ogni documento, vuol dire praticamente copiare il dataset originale.
 
-**Entita nominali**: conviene in fase di processazione del testo riconoscere come **biword** nomi come `Michael Jackson`, tuttavia tengo in memoria anche `Michael` e `Jackson`.
-* **query piu richieste**: sfrutto il fatto che certe combinazioni sono piu richieste. 
+**Entita nominali**: conviene in fase di processazione del testo riconoscere come **biword** entita come `Michael Jackson`, tuttavia tengo in memoria anche `Michael` e `Jackson`.
+* **query piu richieste**: sfrutto il fatto che certe combinazioni sono piu richieste, **per queste creo un biword index**.
 * *devo trovare **tradeoff** tra spazio e tempo quando costruisco questi indici*
 
 

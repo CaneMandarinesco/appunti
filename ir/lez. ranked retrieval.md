@@ -1,5 +1,40 @@
 
 ## 1. Introduzione al Ranked Retrieval
+**modelli distribuzionali della semantica lessicale**: *un modo per rappresentare il **significato** delle parole in modo automatico a partire dai **testi**.*
+
+**Distributional Hypothesis**: *parole con significati simili tendono ad apparire in contesti simili*
+
+**significato di una parola**: e' dato dall'insieme delle parole insieme a cui questa compare. guardiamo i contesti in cui compare.
+
+**contesto di una parola**: e' dato dalle parole a sinistra e a destra.
+
+**distribuzione dei sinonimi**: su larga scala i sinonimi appaiono negli stessi contesti, dunque hanno significato simile.
+
+**Esempio**: se nel corpus compaiono spesso `cane` e `gatto`, allora posso concludere che `cane` e `gatto` nel contesto del corpus sono semanticamente simili.
+
+**significato di una parola**: e' un concetto **statistico**.
+## tipi di relazioni tra parole
+**3 tipi di relazioni tra parole**:
+1. **relazioni sintagmatiche**:  relazione in presenza, dipende dalla vicinanza e dall'ordine nella frase. 
+	1. **Come si identifica?**: guardo a sinistra e a destra della parola, *cerco una concorrenza nella stessa frase.*
+	2. **ES**: `il lupo e' affamato`, allora `lupo` e `affamato` sono in relazione sintagmatica
+2. **relazioni paradigmatiche**: parole che possono essere scambiate.
+	1. **non concorrenza**: non compaiono insieme, perche' condividono lo stesso contesto linguistico
+	2. `il lipo e' affamato`, ma `affamato` potrebbe essere cambiato con `assetato`.
+	3. **ci interessa per identificare**: parole semanticamente vicine.
+3. **Relazioni topiche**: parole legate allo stesso **argomento**
+	1. **Come si identifica**? Quando due parole compaiono spesso su un **topic**.
+
+**word spaces**, spazio vettoriale:
+* **vettore numerico**: rappresentare con un vettore ogni parola.
+* **come si costruisce**? guardo parole che appaiono in contesti simili.
+* **come si misura la similarità**? tramite le distanze nello spazio
+
+**topic space**: 
+* **cos'e' il contesto**? e' l'intero documento.
+* **relazione semantica**: due parole sono nello stesso documento.
+* usa tipicamente **TF-IDF**.
+
 **Perche' Ranked retrieval?**
 - **Problemi della Ricerca Booleana:**
     - **Feast or Famine (Abbondanza o Carestia):** a causa di OR e AND le query danno **troppi** risultati o nessun **risultato**.
@@ -12,7 +47,7 @@
 **ordinati**: voglio i risultati ordinati per rilevanza.
 
 ## 2. Prime Misure di Similarità e Rappresentazione
-
+ 
 - **Coefficiente di Jaccard:** $J(A,B)= \frac{|A \cap B|}{|A \cup B|}$
     - **Limiti:** Non considera la frequenza dei termini e non tiene conto della rarità dei termini nella collezione.
     - **Cosa vorrei**: i match in un documento su termini poco frequenti dovrebbero essere più informativi.

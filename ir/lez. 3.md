@@ -1,6 +1,8 @@
 **Costruzione index**: ordino i termini in $O(n\log n)$
 **Problema**: troppa memoria e tempo. I dati sono tanti.
 
+**indexer**: e' la macchina o il processo che costruisce l'indice.
+
 **RCV1**: collezione usata fine anni 90, vecchia e piccola. Collezione di notizie di reuters.
 
 **formattazione RCV1**: titolo, data e body.
