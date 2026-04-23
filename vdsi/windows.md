@@ -8,7 +8,6 @@ https://www.thehacker.recipes/
 
 **SAM(Security Accounts Manager)**:  database locale di un sistema windows standalone
 **NTDS.dit**: È il database di **Active Directory**. Non contiene solo password, ma l'intera struttura del dominio (oggetti, gruppi, permessi). Si trova solo sui Domain Controller (DC).
-
 ## SAM
 **SAM**: file database, che contiene le password criptate. Mantiene un **lock** sul file per accederlo.
 

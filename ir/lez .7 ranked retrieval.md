@@ -50,8 +50,6 @@ $\text{tg-matching-score}(q,d)=\sum_{t\in q\cap d}(1 + \log \text{tf}_{t,d})$
 * **ammorbidire** l'effetto di idf: $\frac {\log N}{\text{df}_{t}}$ invece di $\frac{N}{\text{df}_{t}}$
 
 **relazione tra $\text{df}_{t}$ e $\text{idf}_{t}$**: $\text{df}_{t}$ **piccolo** implica un $\text{idf}_{t}$ **alto** e viceversa.
-
-
 ## tf-idf
 **peso** $\text{tf-idf}$: e' il **prodotto** dei pesi $\text{tf}$ e $idf$.
 * $w_{t,d} = (1 + \log \text{tf}_{t,d}) \log \frac{N}{\text{df}_{t}}$
@@ -59,16 +57,49 @@ $\text{tg-matching-score}(q,d)=\sum_{t\in q\cap d}(1 + \log \text{tf}_{t,d})$
 
 **documento come vettore**: rappresento un documento come un vettore di pesi $\text{tf-idf}$ in $\mathbb R^{|V|}$. 
 * **dimensioni**: $|V|$ che e' grande.
-* **vettore**: molto sparso.
+* **vettore**: molto sparso, la maggior parte delle componenti valgono 0 se il dizionario e' molto ampio.
 
-key
+**calcolo vettore tf-idf nella query**: devo calcolare $q = [w_{1,q}, w_{2,q},\dots,w_{M,q}]$
+* $\text{tf}_{t,q} = \text{numero di volte che il termine compare nella query}$
+* $\text{idf}_{t} = \text{importanza del termine sul corpus dei documenti}$
+* allora per calcolare ogni componente di $q$: $w_{t,q} = \text{tf}_{t,q} \cdot \text{idf}_{t}$
+
+**ranking per prossimita**: 
+* **distanza negativa** $\sim \text{ similarita } \sim \text{prossimita}$
+* **ordine inverso**: voglio ordinare in ordine inverso rispetto alla distanza tra vettore documento e vettore della query.
+* **definire la distanza**: come definisco la distanza tra due vettori in $|V|$ dimensioni?
+
+**distanza euclidea**: ha diversi problemi.
+* **sensibile alla lunghezza**: un documento lungo ha un vettore di lunghezza maggiore, anche se semanticamente e' identico ad uno piu' corto.
+* **ES**: sia $D_{1}$ un documento e $D_{2}=D_{1}D_{1}$ ($D_{1}$ concatenato a se stesso). Allora $D_{2}$ ha lo stesso significato semantico di $D_{1}$, ma la distanza tra i due vettori e' grande, dunque dovrebbero avere bassa similarità.
+* **documenti lunghi hanno piu significato**: anche se magari, non sono rilevanti di testi con meno parole.
+
+**similarità tra angoli**: meglio della distanza euclidea. ordino i documenti in base all'angolo tra il vettore documento e vettore query.
+* **2 documenti sono vettori se**: l'angolo e' di 0 gradi, ossia puntano nella stessa direzione.
+* **2 documenti sono ortogonali se**: l'angolo e' di 90 gradi, ossia puntano in direzioni completamente diverse.
+
+**funzione coseno**: e' monotonamente decrescente in $[0,180\degree]$.
+*   $\cos(0°) = 1$ (massima similarità)
+*   $\cos(90°) = 0$ (nessuna similarità)
+*   $\cos(180°) = -1$ (massima dissimilarità, ma non si usa in IR con pesi positivi).
+* **gemini**: non ho capito pk!!!
+
+**ranking**:  $\text{angolo decrescente}\equiv \text{coseno crescente }$
+* $\text{ coseno grande } \to \text{ angolo piccolo}$
+* $\text{ angolo grande } \to \text{ coseno piccolo }$
+
+**calcolare cos su vettori normalizzati** $\cos(\vec{q}, \vec{d})=\vec{q} \times \vec{ d} = \sum_{i} q_{i} d_{i}$
+* **normalizzazione**: vale solo se i vettori sono normalizzati.
+
+**applicare cosine similarity**:
+* normalizza i vettori
+* somma il prodotto delle componenti quando diverse da 0.
+
+**calcolare cos**: $$
+\cos(\vec{q}, \vec{d}) = \text{sim}(\vec{q}, \vec{d}) = \frac{\vec{q}}{|\vec{q}|}\frac{\vec{d}}{|\vec{d}|} = \frac{\sum_{i=1}^{|V|} q_{i} d_{i}}{\sqrt{ \sum_{i=1}^{|V|}q_{i}^2 } \sqrt{ \sum_{i=1}^{|V|}d_{i}^2 }}
+$$
+* **normalizzazione**: $\frac{\vec{q}}{|\vec{q}|}$ divido il vettore per la sua lunghezza
+* $L_{2}$: $||x||_{2} = \sqrt{ \sum_{i}x_{i}^2 } = 1$, dunque i vettori vengono proiettati su una sphera di raggio 1. **gemini spiega meglio.**
 
 
-
-
-
-
-
-
-
-
+![[Pasted image 20260407123204.png|400]]
