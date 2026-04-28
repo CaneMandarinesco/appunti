@@ -151,3 +151,38 @@ done
 
 **mitigare**: l'attacco zone transfer puo' essere facilmente bloccato configurando una lista di ip che possono fare il zone transfer
 
+# host discovery
+**DNS Enumeration**: non mi trova tutti gli host attivi in rete, alcuni potrebbero non avere un nome associato.
+
+**arp scan**: funziona solo se ti trovi nella stessa sottorete degli host da attaccare.
+
+**ping scan**: si fa con `nmap`
+* **ICMP echo request**: uso ICMP per interrogare i probabili host
+* **remote networks**: ICMP puo' attraversare le reti
+* **firewall**: potrebbe bloccare i messaggi ICMP.
+
+**identificare il servizio**: una volta trovato con ping scan un host bisogna capire che servizi esegue sulle porte.
+ 
+**port scanning**: devo testare quali porte sono aperte, chiuse o filtrate sull'host da attaccare.
+* **porte standard**: ricorda che molti servizi eseguono su porte fissate.
+* **offensive/defensive secuirity**: in entrambi gli ambiti bisogna fare port scanning.
+
+**port binding**: il sistema operativo per esporre un servizio alla rete lega il processo ad una specifica coppia (IP adress, port)
+
+**servizi diversi, ip diversi, su stesso host**, per esempio:
+* web app viene esposta legandola **all'ip address pubblico** della macchina
+* una web app interna, per esempio di controllo della macchina, viene legata all'ip address locale, per esempio all'interfaccia di **loopback** `127.0.0.1`
+
+**ogni porta ha il suo linguaggio**: quando interrogo una porta devo farlo usando il suo protocollo.
+1. **identificare il protocollo di trasporto**: `TCP, UPD, ...`
+2. **identificare il protocollo a livello di applicazione**: `HTTP, SSH, FTP, ...`
+
+# TCP
+![[Pasted image 20260428152305.png]]
+**durante il three-way-handshake**:
+* **negoziazione parametri**: parametri di rete, della connessione TCP.
+* **se l'handshake viene completato**: allora la porta e' aperta.
+
+```bash
+nc -n -vv -w 1 -z <ip addr> <port range>
+```
