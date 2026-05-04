@@ -38,3 +38,6 @@ assumo che ci siano due tipi di termini in un doucumento (derivo  dall'immagine 
 ![[Pasted image 20260428162309.png]]
 ![[Pasted image 20260428162547.png]]
 **vogliamo che il contributo sia non binario rispetto a BIM**: 
+
+
+... altre cose

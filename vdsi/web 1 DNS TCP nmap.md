@@ -155,11 +155,13 @@ done
 **DNS Enumeration**: non mi trova tutti gli host attivi in rete, alcuni potrebbero non avere un nome associato.
 
 **arp scan**: funziona solo se ti trovi nella stessa sottorete degli host da attaccare.
+![[Pasted image 20260428210518.png]]
 
 **ping scan**: si fa con `nmap`
 * **ICMP echo request**: uso ICMP per interrogare i probabili host
 * **remote networks**: ICMP puo' attraversare le reti
 * **firewall**: potrebbe bloccare i messaggi ICMP.
+![[Pasted image 20260428210536.png]]
 
 **identificare il servizio**: una volta trovato con ping scan un host bisogna capire che servizi esegue sulle porte.
  
@@ -176,7 +178,6 @@ done
 **ogni porta ha il suo linguaggio**: quando interrogo una porta devo farlo usando il suo protocollo.
 1. **identificare il protocollo di trasporto**: `TCP, UPD, ...`
 2. **identificare il protocollo a livello di applicazione**: `HTTP, SSH, FTP, ...`
-
 # TCP
 ![[Pasted image 20260428152305.png]]
 **durante il three-way-handshake**:
@@ -186,3 +187,42 @@ done
 ```bash
 nc -n -vv -w 1 -z <ip addr> <port range>
 ```
+
+## UDP scan
+**a differenza di TCP**:
+* **niente three-way handshake**
+* **stateless**
+* `nc -nv -u -z -w 1 <ip address> <port range>`
+* guardare 
+
+**come si fa lo scan udp**? viene mandato un pacchetto udp vuoto alla porta.
+* **se porta aperta**: non ricevo niente dalla target machine
+* **se la porta e' chiusa**: ricevo messaggio ICMP di errore
+
+**falsi positivi**: avviene se un firewall blocca il messaggio ICMP.
+**list**: spesso scansiono solo una lista predeterminata di porte interessanti, dove so che ci sara qualcosa di interessante.
+
+
+## nmap
+**default**: scansiona le 1000 porte TCP piu popolari su un target in input
+**port states**:
+![[Pasted image 20260428215407.png]]
+
+
+**-p**: specifica un range di porte. `nmap <ip address> -p25-150`
+**CIDR**: per specificare un range di indirizzi
+
+**identita**: vogliamo nascondere il nostro ip da cui parte la scansione
+* **-S: spoof**, qualsiasi risposta viene re-direzionato allo spoofed ip.
+* **-D**: posso offuscare l'indirizzo ip scegliendolo randomicamente da una lista. `nmap <ip address> -D <fake ip list>`
+
+**icmp**: nmap usa icmp di default, ma molti firewall lo bloccano.
+* `ping`: nmap di default scansiona mandando una **echo request** ed aspettando una **echo reply** via icmp.
+* **a che serve ping**? serve a controllare se il target e' acceso (up)
+* **-P0**: sopprime icmp.
+
+**nmap, scan e porte default**: quando una porta e' attiva, e nmap la trova, viene ritornato il servizio di default su quella porta.
+
+**servizio**: non sappiamo dunque che servizio viene eseguito su quella porta.
+* sulla 22 c'e' ssh?
+* sulla 80 che tipo di server http c'e'?
